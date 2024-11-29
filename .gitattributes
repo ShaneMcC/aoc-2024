@@ -1,0 +1,2 @@
+*/input.txt  filter=crypt diff=crypt merge=crypt
+*/desc.txt  filter=crypt diff=crypt merge=crypt
