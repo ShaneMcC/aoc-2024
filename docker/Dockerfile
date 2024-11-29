@@ -1,0 +1,15 @@
+FROM alpine:edge
+
+ADD entrypoint.sh /entrypoint.sh
+
+RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing php84 php84-gmp php84-opcache bash hyperfine python3 py3-pip z3 z3-dev py3-z3 && \
+    ln -sf /usr/bin/php84 /usr/bin/php && \
+    touch /etc/php84/conf.d/01_jit.ini && \
+    chmod 777 /etc/php84/conf.d/01_jit.ini && \
+    chmod +x /entrypoint.sh && \
+    chown -R nobody:nobody /entrypoint.sh
+
+USER nobody
+
+CMD /entrypoint.sh
+VOLUME /code
