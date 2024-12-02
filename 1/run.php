@@ -3,27 +3,24 @@
 	require_once(dirname(__FILE__) . '/../common/common.php');
 	$input = getInputLines();
 
-	$list1 = [];
-	$list2 = [];
+	$left = [];
+	$right = [];
 	foreach ($input as $line) {
-		preg_match('#(.*) (.*)#SADi', $line, $m);
-		[$all, $foo, $bar] = $m;
-		$list1[] = trim($foo);
-		$list2[] = trim($bar);
+		preg_match('#(\d+)\s+(\d+)#ADi', $line, $m);
+		[$all, $left[], $right[]] = $m;
 	}
 
-	sort($list1);
-	sort($list2);
+	sort($left);
+	sort($right);
 
-	$list2acv = array_count_values($list2);
+	$rightacv = array_count_values($right);
 
 	$part1 = 0;
 	$part2 = 0;
-	for ($i = 0; $i < count($list1); $i++) {
-		$part1 += abs($list1[$i] - $list2[$i]);
-		$part2 += ($list2acv[$list1[$i]] ?? 0) * $list1[$i];
+	for ($i = 0; $i < count($left); $i++) {
+		$part1 += abs($left[$i] - $right[$i]);
+		$part2 += ($rightacv[$left[$i]] ?? 0) * $left[$i];
 	}
 
 	echo 'Part 1: ', $part1, "\n";
-
 	echo 'Part 2: ', $part2, "\n";
