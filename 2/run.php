@@ -9,19 +9,15 @@
 	}
 
 	function checkSafe($report) {
-		$forward = $report;
-		sort($forward);
-		$backward = $report;
-		rsort($backward);
-
-		if ($report != $forward && $report != $backward) {
-			return false;
-		}
-
+		$lastDirection = null;
 		for ($i = 1; $i < count($report); $i++) {
-			$cur = $report[$i];
-			$prev = $report[$i - 1];
-			$diff = abs($cur - $prev);
+			$diff = $report[$i] - $report[$i - 1];
+
+			$direction = ($diff < 0);
+			if ($lastDirection !== null && $direction !== $lastDirection) { return false; }
+			$lastDirection = $direction;
+
+			$diff = abs($diff);
 			if ($diff == 0 || $diff > 3) {
 				return false;
 			}
