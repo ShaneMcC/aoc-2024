@@ -17,8 +17,7 @@
 			if ($lastDirection !== null && $direction !== $lastDirection) { return false; }
 			$lastDirection = $direction;
 
-			$diff = abs($diff);
-			if ($diff == 0 || $diff > 3) {
+			if ($diff < -3 || $diff == 0 || $diff > 3) {
 				return false;
 			}
 		}
