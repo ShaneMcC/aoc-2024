@@ -8,25 +8,47 @@
 		$entries[] = explode(" ", $line);
 	}
 
-	$part1 = 0;
-	foreach ($entries as $e) {
-		$forward = $e; sort($forward);
-		$backward = $e; rsort($backward);
+	function checkSafe($report) {
+		$forward = $report;
+		sort($forward);
+		$backward = $report;
+		rsort($backward);
 
-		if ($e != $forward && $e != $backward) { continue; }
+		if ($report != $forward && $report != $backward) {
+			return false;
+		}
 
-		for ($i = 1; $i < count($e); $i++) {
-			$cur = $e[$i];
-			$prev = $e[$i - 1];
+		for ($i = 1; $i < count($report); $i++) {
+			$cur = $report[$i];
+			$prev = $report[$i - 1];
 			$diff = abs($cur - $prev);
 			if ($diff == 0 || $diff > 3) {
-				continue 2;
+				return false;
 			}
 		}
 
-		$part1++;
+		return true;
+	}
+
+	$part1 = 0;
+	$part2 = 0;
+	foreach ($entries as $e) {
+		if (checkSafe($e)) {
+			$part1++;
+			$part2++;
+		} else {
+			// Try removing bits...
+			for ($i = 0; $i < count($e); $i++) {
+				$testReport = $e;
+				unset($testReport[$i]);
+				$testReport = array_values($testReport);
+
+				if (checkSafe($testReport)) {
+					$part2++;
+					break;
+				}
+			}
+		}
 	}
 	echo 'Part 1: ', $part1, "\n";
-
-	// $part2 = -1;
-	// echo 'Part 2: ', $part2, "\n";
+	echo 'Part 2: ', $part2, "\n";
