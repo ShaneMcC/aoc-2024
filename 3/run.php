@@ -5,7 +5,7 @@
 
 	$entries = [];
 	foreach ($input as $line) {
-		preg_match_all("#(do\(\)|don't\(\)|mul\(([0-9]{1,3}),([0-9]{1,3})\))#", $line, $m);
+		preg_match_all("#(do\(\)|don't\(\)|mul\((\d{1,3}),(\d{1,3})\))#", $line, $m);
 		for ($i = 0; $i < count($m[0]); $i++) {
 			$entries[] = empty($m[2][$i]) ? $m[1][$i] : [$m[2][$i], $m[3][$i]];
 		}
