@@ -28,17 +28,15 @@
 		return $count;
 	}
 
-	function hasX_MAS($map, $x, $y) {
-		$tl = $map[$y - 1][$x - 1] ?? '.';
-		$tr = $map[$y - 1][$x + 1] ?? '.';
-		$bl = $map[$y + 1][$x - 1] ?? '.';
-		$br = $map[$y + 1][$x + 1] ?? '.';
+	function hasCrossedMAS($map, $x, $y) {
+		$first = ($map[$y - 1][$x - 1] ?? '.') . $map[$y][$x] . ($map[$y + 1][$x + 1] ?? '.'); // TL + BR
+		$second = ($map[$y - 1][$x + 1] ?? '.') . $map[$y][$x] . ($map[$y + 1][$x - 1] ?? '.'); // TR + BL
 
-		if ((($tl == 'M' && $br == 'S') || ($tl == 'S' && $br == 'M')) && (($tr == 'M' && $bl == 'S') || ($tr == 'S' && $bl == 'M'))) {
-			return 1;
+		if (in_array($first, ['MAS', 'SAM']) && in_array($second, ['MAS', 'SAM'])) {
+			return true;
 		}
 
-		return 0;
+		return false;
 	}
 
 
@@ -50,8 +48,8 @@
 			$part1 += hasXMAS($map, $x, $y);
 		}
 
-		if ($cell == 'A') {
-			$part2 += hasX_MAS($map, $x, $y);
+		if ($cell == 'A' && hasCrossedMAS($map, $x, $y)) {
+			$part2++;
 		}
 	}
 
