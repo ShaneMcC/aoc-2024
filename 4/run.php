@@ -4,21 +4,11 @@
 	$map = getInputMap();
 
 	function hasXMAS($map, $x, $y) {
-		$directions = [[1, 0],  // Forwards
-		               [-1, 0], // Backwards
-		               [0, -1], // Up
-		               [0, 1], // Down
-		               [1, -1], // Diagonal Up Forwards
-		               [1, 1], // Diagonal Down Forwards
-		               [-1, -1], // Diagonal Up Backwards
-		               [-1, 1], // Diagonal Down Backwards
-	    ];
-
 		$count = 0;
-		foreach ($directions as $dir) {
+		foreach (getAdjacentDirections(true, false) as $dir) {
 			$word = '';
 			for ($i = 0; $i < 4; $i++) {
-				$word .= $map[$y + $dir[1] * $i][$x + $dir[0] * $i] ?? '.';
+				$word .= $map[$y + ($dir[1] * $i)][$x + ($dir[0] * $i)] ?? '.';
 			}
 			if ($word == 'XMAS') {
 				$count++;

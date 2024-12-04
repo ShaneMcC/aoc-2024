@@ -239,7 +239,7 @@
 	 *
 	 * @param $grid Grid to look at.
 	 * @param $wanted Cell content to look for.
-	 * @return array<int, int[]> Matching cells.
+	 * @return array<int[]> Matching cells.
 	 */
 	function findCells($grid, $wanted): array {
 		$cells = [];
@@ -252,6 +252,29 @@
 	}
 
 	/**
+	 * Provide adjacent directions
+	 *
+	 * @param $diagonal (Default: false) Include diagonals?
+	 * @param $self (Default: false) Include self?
+	 * @return array<[int, int, String]> Array of all existing adjacent cells directions ([x, y, description])
+	 */
+	function getAdjacentDirections($diagonal = false, $self = false) {
+		$adjacent = [];
+
+		if ($diagonal) { $adjacent[] = [-1, -1, 'UpLeft']; }
+		$adjacent[] = [0, -1, 'Up'];
+		if ($diagonal) { $adjacent[] = [1, -1, 'UpRight']; }
+		$adjacent[] = [-1, 0, 'Left'];
+		if ($self) { $adjacent[] = [0, 0, 'None']; }
+		$adjacent[] = [1, 0, 'Right'];
+		if ($diagonal) { $adjacent[] = [-1, 1, 'DownLeft']; }
+		$adjacent[] = [0, 1, 'Down'];
+		if ($diagonal) { $adjacent[] = [1, 1, 'DownRight']; }
+
+		return $adjacent;
+	}
+
+	/**
 	 * Generator to provide adjacent cells of a point.
 	 *
 	 * @param $grid Grid to look at
@@ -259,20 +282,16 @@
 	 * @param $y Y point
 	 * @param $diagonal (Default: false) Include diagonals?
 	 * @param $self (Default: false) Include self?
-	 * @return array<int, int[]> Array of all existing adjacent cells
+	 * @return array<int[]> Array of all existing adjacent cells co-ordinates
 	 */
 	function getAdjacentCells($grid, $x, $y, $diagonal = false, $self = false): array {
 		$adjacent = [];
 
-		if ($diagonal && isset($grid[$y - 1][$x - 1])) { $adjacent[] = [$x - 1, $y - 1]; }
-		if (isset($grid[$y - 1][$x])) { $adjacent[] = [$x, $y - 1]; }
-		if ($diagonal && isset($grid[$y - 1][$x + 1])) { $adjacent[] = [$x + 1, $y - 1]; }
-		if (isset($grid[$y][$x - 1])) { $adjacent[] = [$x - 1, $y]; }
-		if ($self && isset($grid[$y][$x])) { $adjacent[] = [$x, $y]; }
-		if (isset($grid[$y][$x + 1])) { $adjacent[] = [$x + 1, $y]; }
-		if ($diagonal && isset($grid[$y + 1][$x - 1])) { $adjacent[] = [$x - 1, $y + 1]; }
-		if (isset($grid[$y + 1][$x])) { $adjacent[] = [$x, $y + 1]; }
-		if ($diagonal && isset($grid[$y + 1][$x + 1])) { $adjacent[] = [$x + 1, $y + 1]; }
+		foreach (getAdjacentDirections($diagonal, $self) as $d) {
+			if (isset($grid[$y + $d[1]][$x + $d[0]])) {
+				$adjacent[] = [$x + $d[0], $y + $d[1]];
+			}
+		}
 
 		return $adjacent;
 	}
