@@ -28,15 +28,32 @@
 		return $count;
 	}
 
+	function hasX_MAS($map, $x, $y) {
+		$tl = $map[$y - 1][$x - 1] ?? '.';
+		$tr = $map[$y - 1][$x + 1] ?? '.';
+		$bl = $map[$y + 1][$x - 1] ?? '.';
+		$br = $map[$y + 1][$x + 1] ?? '.';
+
+		if ((($tl == 'M' && $br == 'S') || ($tl == 'S' && $br == 'M')) && (($tr == 'M' && $bl == 'S') || ($tr == 'S' && $bl == 'M'))) {
+			return 1;
+		}
+
+		return 0;
+	}
+
+
 	$part1 = 0;
+	$part2 = 0;
 
 	foreach (cells($map) as [$x, $y, $cell]) {
 		if ($cell == 'X') {
 			$part1 += hasXMAS($map, $x, $y);
 		}
+
+		if ($cell == 'A') {
+			$part2 += hasX_MAS($map, $x, $y);
+		}
 	}
 
 	echo 'Part 1: ', $part1, "\n";
-
-	// $part2 = 0;
-	// echo 'Part 2: ', $part2, "\n";
+	echo 'Part 2: ', $part2, "\n";
