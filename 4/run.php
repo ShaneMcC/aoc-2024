@@ -3,14 +3,14 @@
 	require_once(dirname(__FILE__) . '/../common/common.php');
 	$map = getInputMap();
 
-	function hasXMAS($map, $x, $y) {
+	function hasWORD($map, $x, $y, $wantedWord = 'XMAS') {
 		$count = 0;
 		foreach (getAdjacentDirections(true, false) as $dir) {
 			$word = '';
-			for ($i = 0; $i < 4; $i++) {
+			for ($i = 0; $i < strlen($wantedWord); $i++) {
 				$word .= $map[$y + ($dir[1] * $i)][$x + ($dir[0] * $i)] ?? '.';
 			}
-			if ($word == 'XMAS') {
+			if ($word == $wantedWord) {
 				$count++;
 			}
 		}
@@ -32,10 +32,11 @@
 
 	$part1 = 0;
 	$part2 = 0;
+	$part1Word = 'XMAS';
 
 	foreach (cells($map) as [$x, $y, $cell]) {
-		if ($cell == 'X') {
-			$part1 += hasXMAS($map, $x, $y);
+		if ($cell == $part1Word[0]) {
+			$part1 += hasWORD($map, $x, $y, $part1Word);
 		}
 
 		if ($cell == 'A' && hasCrossedMAS($map, $x, $y)) {
