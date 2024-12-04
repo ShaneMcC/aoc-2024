@@ -8,7 +8,9 @@
 		foreach (getAdjacentDirections(true, false) as $dir) {
 			$word = '';
 			for ($i = 0; $i < strlen($wantedWord); $i++) {
-				$word .= $map[$y + ($dir[1] * $i)][$x + ($dir[0] * $i)] ?? '.';
+				$letter = $map[$y + ($dir[1] * $i)][$x + ($dir[0] * $i)] ?? '.';
+				$word .= $letter;
+				if ($letter != $wantedWord[$i]) { break; }
 			}
 			if ($word == $wantedWord) {
 				$count++;
