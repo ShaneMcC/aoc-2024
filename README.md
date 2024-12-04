@@ -53,3 +53,11 @@ Valid options:
 Input will be read from STDIN in preference to either <file> or the default files.
 $
 ```
+
+In order to adhere to Advent of Code rules around input distribution but still allowing for automated testing, some of the files in this repo are encrypted using [transcrypt](https://github.com/elasticdog/transcrypt).
+
+If you know the key, after checking out the repo, these files can be automatically decrypted by running this once in the repo after cloning:
+
+```sh
+transcrypt -y -c 'aes-256-cbc' -p 'password goes here'
+```
