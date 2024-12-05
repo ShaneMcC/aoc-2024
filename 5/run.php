@@ -14,38 +14,23 @@
 		$rules[$a][] = $b;
 	}
 
-	function isInOrder($rules, $pages) {
-		for ($i = 0; $i < count($pages); $i++) {
-			$now = $pages[$i];
-
-			if (isset($rules[$now])) {
-				$before = array_slice($pages, 0, $i);
-				foreach ($before as $b) {
-					if (in_array($b, $rules[$now])) {
-						return false;
-					}
-				}
-			}
-		}
-
-		return true;
-	}
-
 	$part1 = $part2 = 0;
 
 	foreach ($updates as $update) {
-		$pages = explode(',', $update);
+		$sortedPages = $pages = explode(',', $update);
 
-		if (isInOrder($rules, $pages)) {
-			$part1 += $pages[count($pages) / 2];
+		usort($sortedPages, function($a, $b) use ($rules) {
+			if (in_array($b, $rules[$a] ?? [])) { return -1; }
+			if (in_array($a, $rules[$b] ?? [])) { return 1; }
+			return 0;
+		});
+
+		$mid = $sortedPages[count($sortedPages) / 2];
+
+		if ($pages == $sortedPages) {
+			$part1 += $mid;
 		} else {
-			usort($pages, function($a, $b) use ($rules) {
-				if (in_array($b, $rules[$a] ?? [])) { return -1; }
-				if (in_array($a, $rules[$b] ?? [])) { return 1; }
-				return 0;
-			});
-
-			$part2 += $pages[count($pages) / 2];
+			$part2 += $mid;
 		}
 	}
 
