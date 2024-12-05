@@ -9,11 +9,9 @@
 	$rules = [];
 	foreach ($ordering as $rule) {
 		[$a, $b] = explode('|', $rule, 2);
-		if (!isset($rules[$a])) { $rules[$a] = ['before' => [], 'after' => []]; }
-		if (!isset($rules[$b])) { $rules[$b] = ['before' => [], 'after' => []]; }
+		if (!isset($rules[$a])) { $rules[$a] = []; }
 
-		$rules[$a]['before'][] = $b;
-		$rules[$b]['after'][] = $a;
+		$rules[$a][] = $b;
 	}
 
 	function isInOrder($rules, $pages) {
@@ -23,7 +21,7 @@
 			if (isset($rules[$now])) {
 				$before = array_slice($pages, 0, $i);
 				foreach ($before as $b) {
-					if (in_array($b, $rules[$now]['before'])) {
+					if (in_array($b, $rules[$now])) {
 						return false;
 					}
 				}
@@ -44,7 +42,7 @@
 			usort($pages, function($a, $b) use ($rules) {
 				if (!isset($rules[$a])) { return 0; }
 
-				if (in_array($b, $rules[$a]['before'])) { return -1; }
+				if (in_array($b, $rules[$a])) { return -1; }
 				else { return 1; }
 			});
 
