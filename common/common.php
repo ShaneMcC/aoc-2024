@@ -571,6 +571,28 @@
 	}
 
 	/**
+	 * Check if an array is sorted based on a given comparator
+	 *
+	 * @param $array Array to check
+	 * @param $comparator (Default: null) Comparator to use to check for sortedness.
+	 *                    If null, then a basic `$a <=> $b` comparator is used.
+	 * @return bool True/False
+	 */
+	function arrayIsSorted($array, $comparator = null) {
+		if (count($array) <= 1) { return True; }
+
+		if ($comparator === null) { $comparator = fn($a, $b) => $a <=> $b; }
+
+		for ($i = 1; $i < count($array); $i++) {
+			if (call_user_func($comparator, $array[$i - 1], $array[$i]) > 0) {
+				return False;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Check if a string starts with another.
 	 *
 	 * @param $haystack Haystack to search

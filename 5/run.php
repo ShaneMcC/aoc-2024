@@ -16,21 +16,21 @@
 
 	$part1 = $part2 = 0;
 
+	$comparator = function($a, $b) use ($rules) {
+		if (in_array($b, $rules[$a] ?? [])) { return -1; }
+		if (in_array($a, $rules[$b] ?? [])) { return 1; }
+		return 0;
+	};
+
 	foreach ($updates as $update) {
-		$sortedPages = $pages = explode(',', $update);
+		$pages = explode(',', $update);
 
-		usort($sortedPages, function($a, $b) use ($rules) {
-			if (in_array($b, $rules[$a] ?? [])) { return -1; }
-			if (in_array($a, $rules[$b] ?? [])) { return 1; }
-			return 0;
-		});
-
-		$mid = $sortedPages[count($sortedPages) / 2];
-
-		if ($pages == $sortedPages) {
-			$part1 += $mid;
+		if (arrayIsSorted($pages, $comparator)) {
+			$part1 += $pages[count($pages) / 2];
 		} else {
-			$part2 += $mid;
+			usort($pages, $comparator);
+
+			$part2 += $pages[count($pages) / 2];
 		}
 	}
 
