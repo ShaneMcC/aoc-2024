@@ -14,7 +14,25 @@
 		$rules[$a][] = $b;
 	}
 
-	$part1 = $part2 = 0;
+	// Using this function ends up being quicker than checking with
+	// our arrayIsSorted() function.
+	function isInOrder($pages) {
+		global $rules;
+
+		for ($i = 0; $i < count($pages); $i++) {
+			$now = $pages[$i];
+
+			if (isset($rules[$now])) {
+				for ($j = 0; $j < $i; $j++) {
+					if (in_array($pages[$j], $rules[$now])) {
+						return false;
+					}
+				}
+			}
+		}
+
+		return true;
+	}
 
 	$comparator = function($a, $b) use ($rules) {
 		if (in_array($b, $rules[$a] ?? [])) { return -1; }
@@ -22,14 +40,15 @@
 		return 0;
 	};
 
+	$part1 = $part2 = 0;
+
 	foreach ($updates as $update) {
 		$pages = explode(',', $update);
 
-		if (arrayIsSorted($pages, $comparator)) {
+		if (isInOrder($pages)) {
 			$part1 += $pages[count($pages) / 2];
 		} else {
 			usort($pages, $comparator);
-
 			$part2 += $pages[count($pages) / 2];
 		}
 	}
