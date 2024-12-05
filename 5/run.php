@@ -14,16 +14,18 @@
 		$rules[$a][$b] = True;
 	}
 
+	$comparator = function($a, $b) use ($rules) {
+		if (isset($rules[$a][$b])) { return -1; }
+		if (isset($rules[$b][$a])) { return 1; }
+		return 0;
+	};
+
 	$part1 = $part2 = 0;
 
 	foreach ($updates as $update) {
 		$sortedPages = $pages = explode(',', $update);
 
-		usort($sortedPages, function($a, $b) use ($rules) {
-			if (isset($rules[$a][$b])) { return -1; }
-			if (isset($rules[$b][$a])) { return 1; }
-			return 0;
-		});
+		usort($sortedPages, $comparator);
 
 		$mid = $sortedPages[count($sortedPages) / 2];
 
