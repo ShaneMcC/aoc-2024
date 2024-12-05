@@ -31,9 +31,7 @@
 		return false;
 	}
 
-
-	$part1 = 0;
-	$part2 = 0;
+	$part1 = $part2 = 0;
 	$part1Word = 'XMAS';
 
 	foreach (cells($map) as [$x, $y, $cell]) {

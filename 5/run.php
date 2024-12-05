@@ -31,8 +31,8 @@
 		return true;
 	}
 
-	$part1 = 0;
-	$part2 = 0;
+	$part1 = $part2 = 0;
+
 	foreach ($updates as $update) {
 		$pages = explode(',', $update);
 

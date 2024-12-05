@@ -13,6 +13,7 @@
 
 	$part1 = $part2 = 0;
 	$on = true;
+
 	foreach ($entries as $entry) {
 		if ($entry == 'do()') {
 			$on = true;

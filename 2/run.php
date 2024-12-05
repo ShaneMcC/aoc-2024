@@ -25,8 +25,8 @@
 		return true;
 	}
 
-	$part1 = 0;
-	$part2 = 0;
+	$part1 = $part2 = 0;
+
 	foreach ($entries as $e) {
 		if (checkSafe($e)) {
 			$part1++;
@@ -45,5 +45,6 @@
 			}
 		}
 	}
+
 	echo 'Part 1: ', $part1, "\n";
 	echo 'Part 2: ', $part2, "\n";
