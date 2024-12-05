@@ -40,10 +40,9 @@
 			$part1 += $pages[count($pages) / 2];
 		} else {
 			usort($pages, function($a, $b) use ($rules) {
-				if (!isset($rules[$a])) { return 0; }
-
-				if (in_array($b, $rules[$a])) { return -1; }
-				else { return 1; }
+				if (in_array($b, $rules[$a] ?? [])) { return -1; }
+				if (in_array($a, $rules[$b] ?? [])) { return 1; }
+				return 0;
 			});
 
 			$part2 += $pages[count($pages) / 2];
