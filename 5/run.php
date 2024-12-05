@@ -34,15 +34,23 @@
 	}
 
 	$part1 = 0;
+	$part2 = 0;
 	foreach ($updates as $update) {
 		$pages = explode(',', $update);
 
 		if (isInOrder($rules, $pages)) {
 			$part1 += $pages[count($pages) / 2];
+		} else {
+			usort($pages, function($a, $b) use ($rules) {
+				if (!isset($rules[$a])) { return 0; }
+
+				if (in_array($b, $rules[$a]['before'])) { return -1; }
+				else { return 1; }
+			});
+
+			$part2 += $pages[count($pages) / 2];
 		}
 	}
 
 	echo 'Part 1: ', $part1, "\n";
-
-	// $part2 = 0;
-	// echo 'Part 2: ', $part2, "\n";
+	echo 'Part 2: ', $part2, "\n";
