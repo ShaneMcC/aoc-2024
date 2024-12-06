@@ -21,11 +21,9 @@
 		while (true) {
 			[$x, $y, $face] = $guard;
 			[$dx, $dy, $nextFace] = $directions[$face];
+			[$nx, $ny] = [$x + $dx, $y + $dy];
 
 			if ($trackVisits) { $visited["{$x},{$y},{$face}"] = [$x, $y, $face]; }
-
-			$nx = $x + $dx;
-			$ny = $y + $dy;
 
 			if (!isset($map[$ny][$nx])) {
 				$isLoop = false;
@@ -62,21 +60,17 @@
 	$previousPositions = [];
     $previousSteps = [];
 	$uniqueObstaclePositions = [];
-	foreach ($visitedMap as $pos) {
+	foreach ($visitedMap as $posKey => $pos) {
 		[$x, $y, $face] = $pos;
 		[$dx, $dy, $nextFace] = $directions[$face];
-		$nx = $x + $dx;
-		$ny = $y + $dy;
+		[$nx, $ny] = [$x + $dx, $y + $dy];
 
-        if (isset($previousSteps["{$nx},{$ny}"])) {
-            continue;
-        }
-
+        if (isset($previousSteps["{$nx},{$ny}"])) { continue; }
 		$looped = getVisitedPositions($map, $pos, false, [$nx, $ny], $previousPositions)[1];
 		if ($looped) {
 			$uniqueObstaclePositions["{$nx},{$ny}"] = True;
 		}
-		$previousPositions["{$x},{$y},{$face}"] = True;
+		$previousPositions[$posKey] = True;
         $previousSteps["{$nx},{$ny}"] = True;
 	}
 	$part2 = count($uniqueObstaclePositions);
