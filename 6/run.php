@@ -12,17 +12,17 @@
 	$directions['v'] = [0, 1, '<'];
 	$directions['^'] = [0, -1, '>'];
 
-	function getVisitedPositions($map, $guard, $trackVisits = true, $obstacle = null) {
+	function getVisitedPositions($map, $guard, $trackVisits = true, $obstacle = null, $previousState = []) {
+        global $DODEBUG;
 		global $directions;
 
 		$isLoop = false;
-		$previousState = [];
 		$visited = [];
 		while (true) {
 			[$x, $y, $face] = $guard;
 			[$dx, $dy, $nextFace] = $directions[$face];
 
-			if ($trackVisits) { $visited["{$x},{$y}"] = [$x, $y]; }
+			if ($trackVisits) { $visited["{$x},{$y},{$face}"] = [$x, $y, $face]; }
 
 			$nx = $x + $dx;
 			$ny = $y + $dy;
@@ -50,14 +50,34 @@
 	}
 
 	$visitedMap = getVisitedPositions($map, $guard)[0];
-	$part1 = count($visitedMap);
+	$uniquePositions = [];
+	foreach ($visitedMap as $pos) {
+		[$x, $y, $face] = $pos;
+		$uniquePositions["{$x},{$y}"] = true;
+	}
+	$part1 = count($uniquePositions);
 	echo 'Part 1: ', $part1, "\n";
 
 	$part2 = 0;
+	$previousPositions = [];
+    $previousSteps = [];
+	$uniqueObstaclePositions = [];
 	foreach ($visitedMap as $pos) {
-		$looped = getVisitedPositions($map, $guard, false, $pos)[1];
+		[$x, $y, $face] = $pos;
+		[$dx, $dy, $nextFace] = $directions[$face];
+		$nx = $x + $dx;
+		$ny = $y + $dy;
+
+        if (isset($previousSteps["{$nx},{$ny}"])) {
+            continue;
+        }
+
+		$looped = getVisitedPositions($map, $pos, false, [$nx, $ny], $previousPositions)[1];
 		if ($looped) {
-			$part2++;
+			$uniqueObstaclePositions["{$nx},{$ny}"] = True;
 		}
+		$previousPositions["{$x},{$y},{$face}"] = True;
+        $previousSteps["{$nx},{$ny}"] = True;
 	}
+	$part2 = count($uniqueObstaclePositions);
 	echo 'Part 2: ', $part2, "\n";
