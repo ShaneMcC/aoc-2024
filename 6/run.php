@@ -32,16 +32,16 @@
 
 			if ($next == '#' || $next == 'O') {
 				$guard = [$x, $y, $nextFace];
+
+				$thisState = "{$x},{$y},{$face}";
+				if (isset($previousState[$thisState])) {
+					$isLoop = true;
+					break;
+				}
+				$previousState[$thisState] = True;
 			} else {
 				$guard = [$x + $dx, $y + $dy, $face];
 			}
-
-			$thisState = "{$x},{$y},{$face}";
-			if (isset($previousState[$thisState])) {
-				$isLoop = true;
-				break;
-			}
-			$previousState[$thisState] = True;
 		}
 
 		return [$visited, $isLoop];
