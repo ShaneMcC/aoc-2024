@@ -13,24 +13,19 @@
 	$directions['^'] = [0, -1, '>'];
 
 	function getVisitedPositions($map, $guard, $trackVisits = true, $obstacle = null, $previousState = []) {
-        global $DODEBUG;
 		global $directions;
 
 		$isLoop = false;
 		$visited = [];
-		while (true) {
+		[$nx, $ny, $_] = $guard;
+		while (isset($map[$ny][$nx])) {
 			[$x, $y, $face] = $guard;
 			[$dx, $dy, $nextFace] = $directions[$face];
 			[$nx, $ny] = [$x + $dx, $y + $dy];
 
 			if ($trackVisits) { $visited["{$x},{$y},{$face}"] = [$x, $y, $face]; }
 
-			if (!isset($map[$ny][$nx])) {
-				$isLoop = false;
-				break;
-			}
-
-			if ($map[$ny][$nx] == '#' || $obstacle === [$nx, $ny]) {
+			if (($map[$ny][$nx] ?? false) === '#' || $obstacle === [$nx, $ny]) {
 				$guard = [$x, $y, $nextFace];
 
 				$thisState = "{$x},{$y},{$face}";
