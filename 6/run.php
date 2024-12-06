@@ -12,61 +12,78 @@
 	$directions['v'] = [0, 1, '<'];
 	$directions['^'] = [0, -1, '>'];
 
-	function getVisitedPositions($map, $guard, $trackVisits = true, $obstacle = null, $previousState = []) {
+	function getNextPosition($map, $guard, $obstacle = null) {
 		global $directions;
 
-		$isLoop = false;
-		$visited = [];
-		[$nx, $ny, $_] = $guard;
-		while (isset($map[$ny][$nx])) {
-			[$x, $y, $face] = $guard;
-			[$dx, $dy, $nextFace] = $directions[$face];
-			[$nx, $ny] = [$x + $dx, $y + $dy];
-
-			if ($trackVisits) { $visited["{$x},{$y},{$face}"] = [$x, $y, $face]; }
-
-			if (($map[$ny][$nx] ?? false) === '#' || $obstacle === [$nx, $ny]) {
-				$guard = [$x, $y, $nextFace];
-
-				$thisState = "{$x},{$y},{$face}";
-				if (isset($previousState[$thisState])) {
-					$isLoop = true;
-					break;
-				}
-				$previousState[$thisState] = True;
-			} else {
-				$guard = [$nx, $ny, $face];
-			}
-		}
-
-		return [$visited, $isLoop];
-	}
-
-	$visitedMap = getVisitedPositions($map, $guard)[0];
-	$uniquePositions = [];
-	foreach ($visitedMap as $pos) {
-		[$x, $y, $face] = $pos;
-		$uniquePositions["{$x},{$y}"] = true;
-	}
-	$part1 = count($uniquePositions);
-	echo 'Part 1: ', $part1, "\n";
-
-	$part2 = 0;
-	$previousPositions = [];
-    $previousSteps = [];
-	$uniqueObstaclePositions = [];
-	foreach ($visitedMap as $posKey => $pos) {
-		[$x, $y, $face] = $pos;
+		[$x, $y, $face] = $guard;
 		[$dx, $dy, $nextFace] = $directions[$face];
 		[$nx, $ny] = [$x + $dx, $y + $dy];
 
-        if (isset($previousSteps["{$nx},{$ny}"])) { continue; }
-		$looped = getVisitedPositions($map, $pos, false, [$nx, $ny], $previousPositions)[1];
-		if ($looped) {
-			$uniqueObstaclePositions["{$nx},{$ny}"] = True;
+		if (($map[$ny][$nx] ?? false) === '#' || $obstacle === [$nx, $ny]) {
+			return [$x, $y, $nextFace, true];
 		}
-		$previousPositions[$posKey] = True;
-        $previousSteps["{$nx},{$ny}"] = True;
+
+		return [$nx, $ny, $face, false];
 	}
-	$part2 = count($uniqueObstaclePositions);
+
+	function getVisitedPositions($map, $guard) {
+		$visitedAll = [];
+		$visitedUnique = [];
+		while (isset($map[$guard[1]][$guard[0]])) {
+			[$x, $y, $face] = $guard;
+
+			$visitedAll["{$x},{$y},{$face}"] = [$x, $y, $face];
+			$visitedUnique["{$x},{$y}"] = True;
+
+			$guard = getNextPosition($map, $guard);
+		}
+
+		return [$visitedAll, $visitedUnique];
+	}
+
+	function willLoop($map, $guard, $obstacle = null, $previousState = []) {
+		while (isset($map[$guard[1]][$guard[0]])) {
+			[$x, $y, $face] = $guard;
+
+			$guard = getNextPosition($map, $guard, $obstacle);
+			if ($guard[3]) {
+				$thisState = "{$x},{$y},{$face}";
+				if (isset($previousState[$thisState])) {
+					return True;
+				}
+				$previousState[$thisState] = True;
+			}
+		}
+
+		return false;
+	}
+
+	function checkObstacleLocations($map, $knownRoute) {
+		global $directions;
+
+		$previousPositions = [];
+		$previousLocations = [];
+		$uniqueObstaclePositions = [];
+		foreach ($knownRoute as $posKey => $pos) {
+			[$x, $y, $face] = $pos;
+			[$dx, $dy] = $directions[$face];
+			[$nx, $ny] = [$x + $dx, $y + $dy];
+
+			if (isset($previousLocations["{$nx},{$ny}"])) { continue; }
+			$looped = willLoop($map, $pos, [$nx, $ny], $previousPositions);
+			if ($looped) {
+				$uniqueObstaclePositions["{$nx},{$ny}"] = True;
+			}
+			$previousPositions[$posKey] = True;
+			$previousLocations["{$nx},{$ny}"] = True;
+		}
+
+		return $uniqueObstaclePositions;
+	}
+
+	[$visitedAll, $visitedUnique] = getVisitedPositions($map, $guard);
+	$part1 = count($visitedUnique);
+	echo 'Part 1: ', $part1, "\n";
+
+	$part2 = count(checkObstacleLocations($map, $visitedAll));
 	echo 'Part 2: ', $part2, "\n";
