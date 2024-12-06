@@ -12,7 +12,7 @@
 	$directions['v'] = [0, 1, '<'];
 	$directions['^'] = [0, -1, '>'];
 
-	function getVisitedPositions($map, $guard) {
+	function getVisitedPositions($map, $guard, $trackVisits = true, $obstacle = null) {
 		global $directions;
 
 		$isLoop = false;
@@ -22,15 +22,17 @@
 			[$x, $y, $face] = $guard;
 			[$dx, $dy, $nextFace] = $directions[$face];
 
-			$visited["{$x},{$y}"] = true;
+			if ($trackVisits) { $visited["{$x},{$y}"] = [$x, $y]; }
 
-			if (!isset($map[$y + $dy][$x + $dx])) {
+			$nx = $x + $dx;
+			$ny = $y + $dy;
+
+			if (!isset($map[$ny][$nx])) {
 				$isLoop = false;
 				break;
 			}
-			$next = $map[$y + $dy][$x + $dx];
 
-			if ($next == '#' || $next == 'O') {
+			if ($map[$ny][$nx] == '#' || $obstacle === [$nx, $ny]) {
 				$guard = [$x, $y, $nextFace];
 
 				$thisState = "{$x},{$y},{$face}";
@@ -40,7 +42,7 @@
 				}
 				$previousState[$thisState] = True;
 			} else {
-				$guard = [$x + $dx, $y + $dy, $face];
+				$guard = [$nx, $ny, $face];
 			}
 		}
 
@@ -52,11 +54,8 @@
 	echo 'Part 1: ', $part1, "\n";
 
 	$part2 = 0;
-	foreach ($visitedMap as $v => $_) {
-		[$x, $y] = explode(',', $v, 2);
-		$newMap = $map;
-		$newMap[$y][$x] = 'O';
-		[$visitedMap, $looped] = getVisitedPositions($newMap, $guard);
+	foreach ($visitedMap as $pos) {
+		$looped = getVisitedPositions($map, $guard, false, $pos)[1];
 		if ($looped) {
 			$part2++;
 		}
