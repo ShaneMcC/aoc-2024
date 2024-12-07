@@ -6,31 +6,34 @@
 	$entries = [];
 	foreach ($input as $line) {
 		preg_match('#(.*): (.*)#ADi', $line, $m);
-		[$all, $foo, $bar] = $m;
-		$entries[$foo] = explode(' ', $bar);
+		[$all, $score, $values] = $m;
+		$entries[$score] = explode(' ', $values);
 	}
 
 	function checkValid($score, $values, $allowConcat = false) {
-		$attempts = [null];
+		$attempts[-1] = True;
 		foreach ($values as $v) {
 			$newAttempts = [];
 
-			foreach ($attempts as $a) {
-				$a1 = ($a === null ? 1 : $a) * $v;
-				$a2 = ($a === null ? 0 : $a) + $v;
-				if ($a1 <= $score) { $newAttempts[] = $a1; }
-				if ($a2 <= $score) { $newAttempts[] = $a2; }
+			foreach ($attempts as $a => $_) {
+				$a1 = ($a === -1 ? $v : $a * $v);
+				if ($a1 <= $score) { $newAttempts[$a1] = True; }
+
+				$a2 = ($a === -1 ? $v : $a + $v);
+				if ($a2 <= $score) { $newAttempts[$a2] = True; }
 
 				if ($allowConcat) {
-					$a3 = ($a === null ? '' : $a) . $v;
-					if ($a3 <= $score) { $newAttempts[] = $a3; }
+					$a3 = 0 + (($a === -1 ? $v : $a.$v));
+					if ($a3 <= $score) { $newAttempts[$a3] = True; }
 				}
 			}
+
+			if (empty($newAttempts)) { return False; }
 
 			$attempts = $newAttempts;
 		}
 
-		foreach ($attempts as $a) {
+		foreach ($attempts as $a => $_) {
 			if ($a == $score) {
 				return True;
 			}
@@ -42,7 +45,7 @@
 	$part1 = $part2 = 0;
 
 	foreach ($entries as $score => $values) {
-		// echo $score, ': ', json_encode($values), ' => ', checkValid($score, $values, true), "\n";
+		// echo $score, ': ', json_encode($values), ' => ', checkValid($score, $values), "\n";
 
 		if (checkValid($score, $values)) {
 			$part1 += $score;
