@@ -23,8 +23,11 @@
 				$t = $a / $v;
 				if (is_int($t)) { $newAttempts[$t] = True; }
 				$newAttempts[$a - $v] = True;
-				if ($allowConcat && str_ends_with($a, $v)) {
-					$newAttempts[substr($a, 0, 0 - strlen($v))] = True;
+				if ($allowConcat) {
+					$mul = 10;
+					while ($mul <= $v) { $mul *= 10; }
+					$t = ($a - $v) / $mul;
+					if (is_int($t)) { $newAttempts[$t] = True; }
 				}
 			}
 
