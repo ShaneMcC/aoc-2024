@@ -59,6 +59,7 @@
 		[$x, $y, $face] = $pos;
 		[$dx, $dy, $nextFace] = $directions[$face];
 		[$nx, $ny] = [$x + $dx, $y + $dy];
+		if ([$x, $y, '^'] == $guard) { continue; }
 
         if (isset($previousSteps["{$nx},{$ny}"])) { continue; }
 		$looped = getVisitedPositions($map, $pos, false, [$nx, $ny], $previousPositions)[1];
