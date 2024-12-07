@@ -26,7 +26,7 @@
 					// $newAttempts[(int)($a . $v)] = True;
 					$mul = 10;
 					while ($mul <= $v) { $mul *= 10; }
-					$newAttempts[($a * $mul + $v)] = True;
+					$newAttempts[($a * $mul) + $v] = True;
 				}
 			}
 
