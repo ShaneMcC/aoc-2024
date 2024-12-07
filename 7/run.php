@@ -7,7 +7,7 @@
 	foreach ($input as $line) {
 		preg_match('#(.*): (.*)#ADi', $line, $m);
 		[$all, $score, $values] = $m;
-		$entries[$score] = explode(' ', $values);
+		$entries[] = [$score, explode(' ', $values)];
 	}
 
 	function checkValid($score, $values, $allowConcat = false) {
@@ -39,7 +39,7 @@
 
 	$part1 = $part2 = 0;
 
-	foreach ($entries as $score => $values) {
+	foreach ($entries as [$score, $values]) {
 		// echo $score, ': ', json_encode($values), ' => ', checkValid($score, $values), "\n";
 
 		if (checkValid($score, $values)) {
