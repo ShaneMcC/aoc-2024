@@ -11,29 +11,19 @@
 	}
 
 	function checkValid($score, $values, $allowConcat = false) {
-		$attempts = [];
-		foreach ($values as $v) {
+		$attempts = [$values[0] => True];
+
+		for ($i = 1; $i < count($values); $i++) {
+			$v = $values[$i];
+
 			$newAttempts = [];
-
-			if (empty($attempts)) {
-				$attempts[$v] = True;
-				continue;
-			}
-
 			foreach ($attempts as $a => $_) {
-				$a1 = ($a * $v);
-				if ($a1 <= $score) { $newAttempts[$a1] = True; }
+				if ($a > $score) { continue; }
 
-				$a2 = ($a + $v);
-				if ($a2 <= $score) { $newAttempts[$a2] = True; }
-
-				if ($allowConcat) {
-					$a3 = 0 + ($a . $v);
-					if ($a3 <= $score) { $newAttempts[$a3] = True; }
-				}
+				$newAttempts[$a * $v] = True;
+				$newAttempts[$a + $v] = True;
+				if ($allowConcat) { $newAttempts[(int)($a . $v)] = True; }
 			}
-
-			if (empty($newAttempts)) { return False; }
 
 			$attempts = $newAttempts;
 		}
