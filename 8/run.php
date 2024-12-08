@@ -27,16 +27,13 @@
 				foreach ($coords as [$x2, $y2]) {
 					if ([$x, $y] == [$x2, $y2]) { continue; }
 
-					$dX = $x2 - $x;
-					$dY = $y2 - $y;
-
-					$aX = $x2 + $dX;
-					$aY = $y2 + $dY;
+					[$dX, $dY] = [$x2 - $x, $y2 - $y];
+					[$aX, $aY] = [$x2 + $dX, $y2 + $dY];
 
 					$first = True;
 					while ($aX >= $minX && $aX <= $maxX && $aY >= $minY && $aY <= $maxY) {
-						if ($first) { $antiNodes["{$aX},{$aY}"] = True; }
-						$first = False;
+						if ($first) { $antiNodes["{$aX},{$aY}"] = True; $first = False; }
+
 						$harmonicAntiNodes["{$aX},{$aY}"] = True;
 
 						$aX += $dX;
