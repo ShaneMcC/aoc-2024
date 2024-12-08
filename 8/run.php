@@ -12,32 +12,46 @@
 		$types[$cell][] = [$x, $y];
 	}
 
-	[$minX, $minY, $maxX, $maxY] = getBoundingBox($map);
+	$bounding = getBoundingBox($map);
 
-	$antiNodes = [];
-	foreach ($types as $type => $coords) {
-		// Look at all other locations from us and store as appropraite
+	function getAntiNodes($types, $bounding, $harmonics = false) {
+		[$minX, $minY, $maxX, $maxY] = $bounding;
+		$antiNodes = [];
+		foreach ($types as $type => $coords) {
+			// Look at all other locations from us and store as appropraite
 
-		foreach ($coords as [$x, $y]) {
-			foreach ($coords as [$x2, $y2]) {
-				if ([$x, $y] == [$x2, $y2]) { continue; }
+			foreach ($coords as [$x, $y]) {
+				foreach ($coords as [$x2, $y2]) {
+					if ([$x, $y] == [$x2, $y2]) { continue; }
 
-				$dX = $x2 - $x;
-				$dY = $y2 - $y;
+					$dX = $x2 - $x;
+					$dY = $y2 - $y;
 
-				$aX = $x2 + $dX;
-				$aY = $y2 + $dY;
+					$aX = $x2 + $dX;
+					$aY = $y2 + $dY;
 
-				if ($aX >= $minX && $aX <= $maxX && $aY >= $minY && $aY <= $maxY) {
-					$antiNodes["{$aX},{$aY}"] = True;
+					if ($harmonics) {
+						$antiNodes["{$x},{$y}"] = True;
+						$antiNodes["{$x2},{$y2}"] = True;
+					}
+
+					while ($aX >= $minX && $aX <= $maxX && $aY >= $minY && $aY <= $maxY) {
+						$antiNodes["{$aX},{$aY}"] = True;
+
+						$aX += $dX;
+						$aY += $dY;
+
+						if (!$harmonics) { break; }
+					}
 				}
 			}
 		}
+
+		return $antiNodes;
 	}
 
-	$part1 = $part2 = 0;
-
-	$part1 = count($antiNodes);
+	$part1 = count(getAntiNodes($types, $bounding));
 	echo 'Part 1: ', $part1, "\n";
 
-	// echo 'Part 2: ', $part2, "\n";
+	$part2 = count(getAntiNodes($types, $bounding, true));
+	echo 'Part 2: ', $part2, "\n";
