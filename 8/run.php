@@ -14,13 +14,16 @@
 
 	$bounding = getBoundingBox($map);
 
-	function getAntiNodes($types, $bounding, $harmonics = false) {
+	function getAntiNodes($types, $bounding) {
 		[$minX, $minY, $maxX, $maxY] = $bounding;
 		$antiNodes = [];
-		foreach ($types as $type => $coords) {
-			// Look at all other locations from us and store as appropraite
+		$harmonicAntiNodes = [];
+		foreach ($types as $coords) {
+			if (count($coords) == 1) { continue; }
 
 			foreach ($coords as [$x, $y]) {
+				$harmonicAntiNodes["{$x},{$y}"] = True;
+
 				foreach ($coords as [$x2, $y2]) {
 					if ([$x, $y] == [$x2, $y2]) { continue; }
 
@@ -30,28 +33,25 @@
 					$aX = $x2 + $dX;
 					$aY = $y2 + $dY;
 
-					if ($harmonics) {
-						$antiNodes["{$x},{$y}"] = True;
-						$antiNodes["{$x2},{$y2}"] = True;
-					}
-
+					$first = True;
 					while ($aX >= $minX && $aX <= $maxX && $aY >= $minY && $aY <= $maxY) {
-						$antiNodes["{$aX},{$aY}"] = True;
+						if ($first) { $antiNodes["{$aX},{$aY}"] = True; }
+						$first = False;
+						$harmonicAntiNodes["{$aX},{$aY}"] = True;
 
 						$aX += $dX;
 						$aY += $dY;
-
-						if (!$harmonics) { break; }
 					}
 				}
 			}
 		}
 
-		return $antiNodes;
+		return [$antiNodes, $harmonicAntiNodes];
 	}
 
-	$part1 = count(getAntiNodes($types, $bounding));
+	[$antiNodes, $harmonicAntiNodes] = getAntiNodes($types, $bounding);
+	$part1 = count($antiNodes);
 	echo 'Part 1: ', $part1, "\n";
 
-	$part2 = count(getAntiNodes($types, $bounding, true));
+	$part2 = count($harmonicAntiNodes);
 	echo 'Part 2: ', $part2, "\n";
