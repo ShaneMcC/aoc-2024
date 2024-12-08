@@ -18,7 +18,7 @@
 
 			$newAttempts = [];
 			foreach ($attempts as $a => $_) {
-				if ($a < 0) { continue; }
+				if ($a <= 0) { continue; }
 
 				$t = $a / $v;
 				if (is_int($t)) { $newAttempts[$t] = True; }
