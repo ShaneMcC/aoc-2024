@@ -3,36 +3,46 @@
 	require_once(dirname(__FILE__) . '/../common/common.php');
 	$input = getInputLine();
 
+	function displaydisk($diskMap) {
+		foreach ($diskMap['blocks'] as $b) {
+			echo $b === null ? '.' : $b;
+		}
+		echo "\n";
+	}
+
 	function generateDiskMap($input) {
-		$real = [];
+		$map = [];
+		$map['blocks'] = [];
+		$map['files'] = [];
+		$map['free'] = [];
+
 		$isFile = True;
 		$fileID = 0;
-		foreach (str_split($input) as $s) {
-			for ($i = 0; $i < $s; $i++) {
-				$real[] = ($isFile) ? $fileID : NULL;
+		$pos = 0;
+		for ($i = 0; $i < strlen($input); $i++) {
+			$s = (int)($input[$i]);
+			for ($j = 0; $j < $s; $j++) {
+				$map['blocks'][] = ($isFile) ? $fileID : NULL;
 			}
+			$detail = ['start' => $pos, 'length' => $s];
+			$pos += $s;
+
 			if ($isFile) {
+				$map['files'][$fileID] = $detail;
 				$fileID++;
+			} else if ($s > 0) {
+				$map['free'][] = $detail;
 			}
 			$isFile = !$isFile;
 		}
 
-		return $real;
+		return $map;
 	}
 
-	function nextFree($diskMap, $pos, $size = 1) {
-		for ($i = $pos; $i < count($diskMap); $i++) {
-			if ($diskMap[$i] === NULL) {
-				$isValid = true;
-				for ($j = $i; $j < $i + $size; $j++) {
-					if (!array_key_exists($j, $diskMap) || $diskMap[$j] !== NULL) {
-						$isValid = false;
-						$i = $j - 1;
-						break;
-					}
-				}
-
-				if ($isValid) { return $i; }
+	function nextFree($diskMap, $size = 1) {
+		foreach ($diskMap['free'] as $freeID => $freeDetail) {
+			if ($freeDetail['length'] >= $size) {
+				return $freeID;
 			}
 		}
 
@@ -42,7 +52,7 @@
 	function nextData($diskMap, $pos) {
 		// Find last non-free space
 		for ($i = $pos; $i >= 0; $i--) {
-			if ($diskMap[$i] !== NULL) {
+			if ($diskMap['blocks'][$i] !== NULL) {
 				return $i;
 			}
 		}
@@ -50,61 +60,69 @@
 	}
 
 	function sortMap($diskMap) {
-		$freeID = nextFree($diskMap, 0);
-		$dataID = nextData($diskMap, count($diskMap) - 1);
+		$freeID = nextFree($diskMap, 1);
+		$freeBlockID = $diskMap['free'][$freeID]['start'];
+		$dataID = nextData($diskMap, count($diskMap['blocks']) - 1);
 
 		// Begin sorting
-		while ($freeID < $dataID) {
-			$diskMap[$freeID] = $diskMap[$dataID];
-			$diskMap[$dataID] = NULL;
+		while ($freeBlockID < $dataID) {
+			$diskMap['free'][$freeID]['start']++;
+			$diskMap['free'][$freeID]['length']--;
+			if ($diskMap['free'][$freeID]['length'] == 0) { unset($diskMap['free'][$freeID]); }
 
-			$freeID = nextFree($diskMap, $freeID);
+			$diskMap['blocks'][$freeBlockID] = $diskMap['blocks'][$dataID];
+			$diskMap['blocks'][$dataID] = NULL;
+
+			$freeID = nextFree($diskMap);
+			$freeBlockID = $diskMap['free'][$freeID]['start'];
 			$dataID = nextData($diskMap, $dataID);
 		}
 
-		return $diskMap;
-	}
-
-	function findEndOfFile($diskMap, $file, $start = 0) {
-		for ($i = $start; $i < count($diskMap); $i++) {
-			if ($diskMap[$i] != $file) { break; }
-		}
-
-		return $i - 1;
+		return $diskMap['blocks'];
 	}
 
 	function cleverSortMap($diskMap) {
-		$largest = max(array_values($diskMap));
+		// displaydisk($diskMap);
+		// echo "\n";
+
+		$largest = max(array_values($diskMap['blocks']));
 
 		for ($fileid = $largest; $fileid >= 1; $fileid--) {
-			$fileStart = array_search($fileid, $diskMap);
-			$fileEnd = findEndOfFile($diskMap, $fileid, $fileStart);
-			$len = ($fileEnd + 1) - $fileStart;
+			$fileStart = $diskMap['files'][$fileid]['start'];
+			$len = $diskMap['files'][$fileid]['length'];
 
-			$freeSpace = nextFree($diskMap, 0, $len);
+			$freeID = nextFree($diskMap, $len);
+			if ($freeID !== null) {
+				$freeSpace = $diskMap['free'][$freeID]['start'];
+				$diskMap['free'][$freeID]['start'] += $len;
+				$diskMap['free'][$freeID]['length'] -= $len;
+				if ($diskMap['free'][$freeID]['length'] == 0) { unset($diskMap['free'][$freeID]); }
+			} else {
+				$freeSpace = null;
+			}
 
-			// echo "{$fileid} => Length {$len}, Moving to: {$freeSpace}", "\n";
+			// echo "{$fileid} => Length {$len}, Moving from {$fileStart} to {$freeSpace}", "\n";
 
 			if ($freeSpace !== null && $freeSpace < $fileStart) {
 				for ($i = 0; $i < $len; $i++) {
-					$diskMap[$freeSpace + $i] = $fileid;
-					$diskMap[$fileStart + $i] = NULL;
+					$diskMap['blocks'][$freeSpace + $i] = $fileid;
+					$diskMap['blocks'][$fileStart + $i] = NULL;
 				}
 			}
 
-			// echo implode('', $diskMap), "\n";
+			// displaydisk($diskMap);
 			// echo "\n";
 
 		}
 
-		return $diskMap;
+		return $diskMap['blocks'];
 	}
 
-	function checksum($diskMap) {
+	function checksum($diskMapBlocks) {
 		$checksum = 0;
-		for ($i = 0; $i < count($diskMap); $i++) {
-			if ($diskMap[$i] !== NULL) {
-				$checksum += $diskMap[$i] * $i;
+		for ($i = 0; $i < count($diskMapBlocks); $i++) {
+			if ($diskMapBlocks[$i] !== NULL) {
+				$checksum += $diskMapBlocks[$i] * $i;
 			}
 		}
 
@@ -112,14 +130,8 @@
 	}
 
 	$diskMap = generateDiskMap($input);
-
- 	$sorted = sortMap($diskMap);
-	$part1 = checksum($sorted);
+	$part1 = checksum(sortMap($diskMap));
 	echo 'Part 1: ', $part1, "\n";
 
-	$sorted = cleverSortMap($diskMap);
-
-	// echo implode('', $sorted), "\n";
-
-	$part2 = checksum($sorted);
+	$part2 = checksum(cleverSortMap($diskMap));
 	echo 'Part 2: ', $part2, "\n";
