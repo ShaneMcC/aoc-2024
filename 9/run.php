@@ -12,7 +12,7 @@
 				$real = array_merge($real, array_fill(0, intval($s), $fileID));
 				$fileID++;
 			} else {
-				$real = array_merge($real, array_fill(0, intval($s), '.'));
+				$real = array_merge($real, array_fill(0, intval($s), NULL));
 			}
 			$isFile = !$isFile;
 		}
@@ -22,10 +22,10 @@
 
 	function nextFree($diskMap, $pos, $size = 1) {
 		for ($i = $pos; $i < count($diskMap); $i++) {
-			if ($diskMap[$i] == '.') {
+			if ($diskMap[$i] === NULL) {
 				$isValid = true;
 				for ($j = $i; $j < $i + $size; $j++) {
-					if (!isset($diskMap[$j]) || $diskMap[$j] != '.') {
+					if (!array_key_exists($j, $diskMap) || $diskMap[$j] !== NULL) {
 						$isValid = false;
 						$i = $j - 1;
 						break;
@@ -42,7 +42,7 @@
 	function nextData($diskMap, $pos) {
 		// Find last non-free space
 		for ($i = $pos; $i >= 0; $i--) {
-			if ($diskMap[$i] != '.') {
+			if ($diskMap[$i] !== NULL) {
 				return $i;
 			}
 		}
@@ -56,7 +56,7 @@
 		// Begin sorting
 		while ($freeID < $dataID) {
 			$diskMap[$freeID] = $diskMap[$dataID];
-			$diskMap[$dataID] = '.';
+			$diskMap[$dataID] = NULL;
 
 			$freeID = nextFree($diskMap, $freeID);
 			$dataID = nextData($diskMap, $dataID);
@@ -88,7 +88,7 @@
 			if ($freeSpace !== null && $freeSpace < $fileStart) {
 				for ($i = 0; $i < $len; $i++) {
 					$diskMap[$freeSpace + $i] = $fileid;
-					$diskMap[$fileStart + $i] = '.';
+					$diskMap[$fileStart + $i] = NULL;
 				}
 			}
 
@@ -103,7 +103,7 @@
 	function checksum($diskMap) {
 		$checksum = 0;
 		for ($i = 0; $i < count($diskMap); $i++) {
-			if ($diskMap[$i] != '.') {
+			if ($diskMap[$i] !== NULL) {
 				$checksum += $diskMap[$i] * $i;
 			}
 		}
