@@ -8,11 +8,11 @@
 		$isFile = True;
 		$fileID = 0;
 		foreach (str_split($input) as $s) {
+			for ($i = 0; $i < $s; $i++) {
+				$real[] = ($isFile) ? $fileID : NULL;
+			}
 			if ($isFile) {
-				$real = array_merge($real, array_fill(0, intval($s), $fileID));
 				$fileID++;
-			} else {
-				$real = array_merge($real, array_fill(0, intval($s), NULL));
 			}
 			$isFile = !$isFile;
 		}
