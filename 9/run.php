@@ -20,11 +20,19 @@
 		return $real;
 	}
 
-	function nextFree($diskMap, $pos) {
-		// Find first free space
+	function nextFree($diskMap, $pos, $size = 1) {
 		for ($i = $pos; $i < count($diskMap); $i++) {
 			if ($diskMap[$i] == '.') {
-				return $i;
+				$isValid = true;
+				for ($j = $i; $j < $i + $size; $j++) {
+					if (!isset($diskMap[$j]) || $diskMap[$j] != '.') {
+						$isValid = false;
+						$i = $j - 1;
+						break;
+					}
+				}
+
+				if ($isValid) { return $i; }
 			}
 		}
 
@@ -57,6 +65,41 @@
 		return $diskMap;
 	}
 
+	function findEndOfFile($diskMap, $file, $start = 0) {
+		for ($i = $start; $i < count($diskMap); $i++) {
+			if ($diskMap[$i] != $file) { break; }
+		}
+
+		return $i - 1;
+	}
+
+	function cleverSortMap($diskMap) {
+		$largest = max(array_values($diskMap));
+
+		for ($fileid = $largest; $fileid >= 1; $fileid--) {
+			$fileStart = array_search($fileid, $diskMap);
+			$fileEnd = findEndOfFile($diskMap, $fileid, $fileStart);
+			$len = ($fileEnd + 1) - $fileStart;
+
+			$freeSpace = nextFree($diskMap, 0, $len);
+
+			// echo "{$fileid} => Length {$len}, Moving to: {$freeSpace}", "\n";
+
+			if ($freeSpace !== null && $freeSpace < $fileStart) {
+				for ($i = 0; $i < $len; $i++) {
+					$diskMap[$freeSpace + $i] = $fileid;
+					$diskMap[$fileStart + $i] = '.';
+				}
+			}
+
+			// echo implode('', $diskMap), "\n";
+			// echo "\n";
+
+		}
+
+		return $diskMap;
+	}
+
 	function checksum($diskMap) {
 		$checksum = 0;
 		for ($i = 0; $i < count($diskMap); $i++) {
@@ -69,9 +112,14 @@
 	}
 
 	$diskMap = generateDiskMap($input);
-	$sorted = sortMap($diskMap);
+
+ 	$sorted = sortMap($diskMap);
 	$part1 = checksum($sorted);
 	echo 'Part 1: ', $part1, "\n";
 
-	// $part2 = 0;
-	// echo 'Part 2: ', $part2, "\n";
+	$sorted = cleverSortMap($diskMap);
+
+	// echo implode('', $sorted), "\n";
+
+	$part2 = checksum($sorted);
+	echo 'Part 2: ', $part2, "\n";
