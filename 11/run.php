@@ -4,34 +4,31 @@
 	$input = explode(' ', getInputLine());
 	$input = array_map(fn($x) => intval(($x)), $input);
 
-	function blink($stones) {
-		$new = [];
+	function blinkCount($stone, $count) {
+		$key = json_encode([__FILE__, __LINE__, func_get_args()]);
 
-		foreach ($stones as $stone) {
-			if ($stone === 0) {
-				$new[] = 1;
+		return storeCachedResult($key, function() use ($stone, $count) {
+			if ($count == 0) {
+				return 1;
+			} if ($stone === 0) {
+				return blinkCount(1, $count - 1);
 			} else if (strlen($stone) % 2 == 0) {
-				$new[] = intval(substr($stone, 0, strlen($stone) / 2));
-				$new[] = intval(substr($stone, strlen($stone) / 2));
-			} else {
-				$new[] = $stone * 2024;
-			}
-		}
+				$left = intval(substr($stone, 0, strlen($stone) / 2));
+				$right = intval(substr($stone, strlen($stone) / 2));
 
-		return $new;
+				return blinkCount($left, $count - 1) + blinkCount($right, $count - 1);
+			} else {
+				return blinkCount($stone * 2024, $count - 1);
+			}
+		});
 	}
 
 	$stones = $input;
-
-	for ($i = 0; $i < 25; $i++) {
-		$stones = blink($stones);
+	$part1 = $part2 = 0;
+	foreach ($stones as $stone) {
+		$part1 += blinkCount($stone, 25);
+		$part2 += blinkCount($stone, 75);
 	}
 
-	$part1 = count($stones);
-
-	// foreach
-
 	echo 'Part 1: ', $part1, "\n";
-
-	// $part2 = 0;
-	// echo 'Part 2: ', $part2, "\n";
+	echo 'Part 2: ', $part2, "\n";
