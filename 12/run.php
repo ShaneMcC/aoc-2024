@@ -40,10 +40,7 @@
 	$regiontypes = [];
 	$regionareas = [];
 	$regionperimiters = [];
-	$tops = [];
-	$bottoms = [];
-	$lefts = [];
-	$rights = [];
+	$sides = [];
 
 	foreach (cells($map) as [$x, $y, $cell]) {
 		$adjacent = getAdjacentCells($map, $x, $y, false);
@@ -66,25 +63,25 @@
 
 	foreach ($regionareas as $checkregion => $_) {
 		for ($y = 0; $y < count($map); $y++) {
-			$lastCellBefore = 'none';
-			$lastCellAfter = 'none';
+			$lastCellBefore = Null;
+			$lastCellAfter = Null;
 			for ($x = 0; $x < count($map[0]); $x++) {
 				$myregion = $regionmap[$y][$x];
 				$before = $regionmap[$y - 1][$x] ?? '.';
 				$after = $regionmap[$y + 1][$x] ?? '.';
 
 				if ($myregion == $checkregion) {
-					if ($before == $myregion) { $cellBefore = 'Same'; } else { $cellBefore = 'Diff'; }
-					if ($after == $myregion) { $cellAfter = 'Same'; } else { $cellAfter = 'Diff'; }
+					$cellBefore = ($before == $myregion);
+					$cellAfter = ($after == $myregion);
 
-					if ($cellBefore != $lastCellBefore && $before != $myregion) {
-						$tops[$myregion] = ($tops[$myregion] ?? 0) + 1;
+					if ($cellBefore !== $lastCellBefore && $before != $myregion) {
+						$sides[$myregion] = ($sides[$myregion] ?? 0) + 1;
 					}
 
-					if ($cellAfter != $lastCellAfter && $after != $myregion) {
-						$bottoms[$myregion] = ($bottoms[$myregion] ?? 0) + 1;
+					if ($cellAfter !== $lastCellAfter && $after != $myregion) {
+						$sides[$myregion] = ($sides[$myregion] ?? 0) + 1;
 					}
-				} else { $cellBefore = 'none'; $cellAfter = 'none'; }
+				} else { $cellBefore = Null; $cellAfter = Null; }
 
 				$lastCellBefore = $cellBefore;
 				$lastCellAfter = $cellAfter;
@@ -92,25 +89,25 @@
 		}
 
 		for ($x = 0; $x < count($map[0]); $x++) {
-			$lastCellBefore = 'none';
-			$lastCellAfter = 'none';
+			$lastCellBefore = Null;
+			$lastCellAfter = Null;
 			for ($y = 0; $y < count($map); $y++) {
 				$myregion = $regionmap[$y][$x];
 				$before = $regionmap[$y][$x - 1] ?? '.';
 				$after = $regionmap[$y][$x + 1] ?? '.';
 
 				if ($myregion == $checkregion) {
-					if ($before == $myregion) { $cellBefore = 'Same'; } else { $cellBefore = 'Diff'; }
-					if ($after == $myregion) { $cellAfter = 'Same'; } else { $cellAfter = 'Diff'; }
+					$cellBefore = ($before == $myregion);
+					$cellAfter = ($after == $myregion);
 
-					if ($cellBefore != $lastCellBefore && $before != $myregion) {
-						$lefts[$myregion] = ($lefts[$myregion] ?? 0) + 1;
+					if ($cellBefore !== $lastCellBefore && $before != $myregion) {
+						$sides[$myregion] = ($sides[$myregion] ?? 0) + 1;
 					}
 
-					if ($cellAfter != $lastCellAfter && $after != $myregion) {
-						$rights[$myregion] = ($rights[$myregion] ?? 0) + 1;
+					if ($cellAfter !== $lastCellAfter && $after != $myregion) {
+						$sides[$myregion] = ($sides[$myregion] ?? 0) + 1;
 					}
-				} else { $cellBefore = 'none'; $cellAfter = 'none'; }
+				} else { $cellBefore = Null; $cellAfter = Null; }
 
 				$lastCellBefore = $cellBefore;
 				$lastCellAfter = $cellAfter;
@@ -122,12 +119,11 @@
 
 	foreach ($regionareas as $regionid => $area) {
 		$perimiter = $regionperimiters[$regionid] ?? 0;
-		$side = ($tops[$regionid] ?? 0) + ($bottoms[$regionid] ?? 0) + ($lefts[$regionid] ?? 0) + ($rights[$regionid] ?? 0);
+		$side = ($sides[$regionid] ?? 0);
 		$type = $regiontypes[$regionid] ?? 0;
 
 		if (isDebug()) {
 			echo "Region: {$regionid} of plant type {$type} has area {$area}, perimiter {$perimiter} and sides {$side}\n";
-			echo "\tT: {$tops[$regionid]}, B: {$bottoms[$regionid]}, L: {$lefts[$regionid]}, R: {$rights[$regionid]}\n";
 		}
 
 		$part1 += ($area * $perimiter);
