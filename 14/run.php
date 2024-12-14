@@ -68,7 +68,8 @@
 	$part1 = getRobotMap($robots)[1];
 	echo 'Part 1: ', $part1, "\n";
 
-	for ($i = 0; $i < 10000; $i++) {
+	$part2 = 0;
+	for ($i = 0; $i < ($mapMaxX * $mapMaxY); $i++) {
 		[$map, $safetyCode] = getRobotMap($robots, $i, true);
 
 		if (hasTree($map)) {
