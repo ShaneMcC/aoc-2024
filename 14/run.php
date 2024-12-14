@@ -18,14 +18,8 @@
 
 		[$px, $py, $vx, $vy] = $robot;
 
-		$px += ($vx * $seconds);
-		$py += ($vy * $seconds);
-
-		if ($px > $mapMaxX) { $px = $px % $mapMaxX; }
-		if ($py > $mapMaxY) { $py = $py % $mapMaxY; }
-
-		while ($px < 0) { $px += $mapMaxX; }
-		while ($py < 0) { $py += $mapMaxY; }
+		$px = wrapmod($px + ($vx * $seconds), $mapMaxX);
+		$py = wrapmod($py + ($vy * $seconds), $mapMaxY);
 
 		return [$px, $py];
 	}
