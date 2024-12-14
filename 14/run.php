@@ -30,49 +30,54 @@
 		return [$px, $py];
 	}
 
-	$q0 = $q1 = $q2 = $q3 = 0;
+	function getRobotMap($robots, $position = 100, $failOnOverlap = false) {
+		global $mapMaxX, $mapMaxY;
 
-	$halfX = (int)floor($mapMaxX / 2);
-	$halfY = (int)floor($mapMaxY / 2);
-
-	$part1 = $part2 = 0;
-
-	for ($i = 0; $i < 10000; $i++) {
 		$map = array_fill(0, $mapMaxY+1, array_fill(0, $mapMaxX+1, null));
 
-		// Secret property of the inputs...
-		// The easter-egg is the first frame with no overlaps.
-		// I hate it.
-		$hasOverlaps = false;
-		foreach ($robots as $robot) {
-			[$px, $py] = getRobotPosition($robot, $i);
+		$q0 = $q1 = $q2 = $q3 = 0;
+		$halfX = (int)floor($mapMaxX / 2);
+		$halfY = (int)floor($mapMaxY / 2);
 
-			if ($i == 100) {
-				if ($px < $halfX && $py < $halfY) { $q0++; }
-				if ($px < $halfX && $py > $halfY) { $q1++; }
-				if ($px > $halfX && $py < $halfY) { $q2++; }
-				if ($px > $halfX && $py > $halfY) { $q3++; }
-			}
+		foreach ($robots as $robot) {
+			[$px, $py] = getRobotPosition($robot, $position);
 
 			$map[$py][$px]++;
 			if ($map[$py][$px] > 1) {
-				$hasOverlaps = True;
-				if ($i != 100 && !isDebug()) {
-					break;
+				if ($failOnOverlap) { return [false, 0]; }
+			}
+
+			if ($px < $halfX && $py < $halfY) { $q0++; }
+			if ($px < $halfX && $py > $halfY) { $q1++; }
+			if ($px > $halfX && $py < $halfY) { $q2++; }
+			if ($px > $halfX && $py > $halfY) { $q3++; }
+		}
+
+		$safetyCode = $q0 * $q1 * $q2 * $q3;
+
+		return [$map, $safetyCode];
+	}
+
+	function hasTree($map) {
+		if (is_array($map)) {
+			// Terrible check for a tree.
+			foreach ($map as $row) {
+				if (strstr(implode(',', $row), '1,1,1,1,1,1,1,1,1,1,1')) {
+					return true;
 				}
 			}
 		}
 
-		if (isDebug()) {
-			drawSparseMap($map, '.', true, $i);
-		}
+		return false;
+	}
 
-		if ($i == 100) {
-			$part1 = $q0 * $q1 * $q2 * $q3;
-			echo 'Part 1: ', $part1, "\n";
-		}
+	$part1 = getRobotMap($robots)[1];
+	echo 'Part 1: ', $part1, "\n";
 
-		if (!$hasOverlaps) {
+	for ($i = 0; $i < 10000; $i++) {
+		[$map, $safetyCode] = getRobotMap($robots, $i, true);
+
+		if (hasTree($map)) {
 			$part2 = $i;
 			break;
 		}
