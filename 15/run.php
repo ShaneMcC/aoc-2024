@@ -16,7 +16,7 @@
 	$directions['>'] = [1, 0];
 	$directions['v'] = [0, 1];
 
-	function canMoveItem($map, $cell, $direction) {
+	function candoMoveItem($map, $cell, $direction) {
 		global $directions;
 
 		[$tX, $tY] = $cell;
@@ -32,14 +32,14 @@
 			} else if ($nextCell === '.') {
 				return True;
 			} else if ($nextCell === '[' && ($direction == '^' || $direction == 'v')) {
-				return canMoveItem($map, [$tX, $tY], $direction) && canMoveItem($map, [$tX + 1, $tY], $direction);
+				return candoMoveItem($map, [$tX, $tY], $direction) && candoMoveItem($map, [$tX + 1, $tY], $direction);
 			} else if ($nextCell === ']' && ($direction == '^' || $direction == 'v')) {
-				return canMoveItem($map, [$tX - 1, $tY], $direction) && canMoveItem($map, [$tX, $tY], $direction);
+				return candoMoveItem($map, [$tX - 1, $tY], $direction) && candoMoveItem($map, [$tX, $tY], $direction);
 			}
 		}
 	}
 
-	function moveItem(&$map, $cell, $direction) {
+	function doMoveItem(&$map, $cell, $direction) {
 		global $directions;
 
 		[$x, $y] = $cell;
@@ -59,7 +59,7 @@
 
 			return [$tX, $tY];
 		} else if ($targetItem === 'O' || $targetItem === '[' || $targetItem === ']') {
-			$moveResult = moveItem($map, [$tX, $tY], $direction);
+			$moveResult = doMoveItem($map, [$tX, $tY], $direction);
 			if ($moveResult !== false) {
 				$map[$tY][$tX] = $myItem;
 				$map[$y][$x] = '.';
@@ -71,11 +71,11 @@
 		return false;
 	}
 
-	function moveWideItem(&$map, $cell, $direction) {
+	function moveItem(&$map, $cell, $direction) {
 		global $directions;
 
 		if ($direction == '<' || $direction == '>') {
-			return moveItem($map, $cell, $direction);
+			return doMoveItem($map, $cell, $direction);
 		} else {
 			[$x, $y] = $cell;
 			[$dX, $dY] = $directions[$direction];
@@ -84,8 +84,8 @@
 			$myItem = $map[$y][$x];
 			$targetItem = $map[$tY][$tX];
 
-			if ($targetItem == '.' || $targetItem == '#') {
-				return moveItem($map, $cell, $direction);
+			if ($targetItem == '.' || $targetItem == '#' || $targetItem == 'O') {
+				return doMoveItem($map, $cell, $direction);
 			} else {
 				if ($targetItem == '[') {
 					$leftCell = [$tX, $tY];
@@ -97,12 +97,12 @@
 					return False;
 				}
 
-				$moveLeftResult = canMoveItem($map, $leftCell, $direction);
-				$moveRightResult = canMoveItem($map, $rightCell, $direction);
+				$moveLeftResult = candoMoveItem($map, $leftCell, $direction);
+				$moveRightResult = candoMoveItem($map, $rightCell, $direction);
 
 				if ($moveLeftResult && $moveRightResult) {
-					moveWideItem($map, $leftCell, $direction);
-					moveWideItem($map, $rightCell, $direction);
+					moveItem($map, $leftCell, $direction);
+					moveItem($map, $rightCell, $direction);
 
 					$map[$tY][$tX] = $myItem;
 					$map[$y][$x] = '.';
@@ -115,12 +115,12 @@
 		return False;
 	}
 
-	function moveAround($map, $instructions, $isWide = false) {
+	function moveAround($map, $instructions) {
 		[$rX, $rY] = findCells($map, '@')[0];
 
 		foreach ($instructions as $instructionLine) {
 			foreach (str_split($instructionLine) as $ins) {
-				$moveResult = $isWide ? moveWideItem($map, [$rX, $rY], $ins) : moveItem($map, [$rX, $rY], $ins);
+				$moveResult = moveItem($map, [$rX, $rY], $ins);
 				if ($moveResult != false) {
 					[$rX, $rY] = $moveResult;
 				}
@@ -131,15 +131,13 @@
 	}
 
 	$finalMap = moveAround($map, $intrs);
-
 	$part1 = 0;
 	foreach (findCells($finalMap, 'O') as [$x, $y]) {
 		$part1 += (100 * $y) + $x;
 	}
 	echo 'Part 1: ', $part1, "\n";
 
-	$finalWideMap = moveAround($wideMap, $intrs, true);
-
+	$finalWideMap = moveAround($wideMap, $intrs);
 	$part2 = 0;
 	foreach (findCells($finalWideMap, '[') as [$x, $y]) {
 		$part2 += (100 * $y) + $x;
