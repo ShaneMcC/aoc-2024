@@ -3,11 +3,11 @@
 	require_once(dirname(__FILE__) . '/../common/common.php');
 	$input = getInputLineGroups();
 
-	$map = [];
-	foreach ($input[0] as $row) { $map[] = str_split($row); }
-
-	$wideMap = [];
-	foreach ($input[0] as $row) { $wideMap[] = str_split(str_replace(['#', 'O', '.', '@'], ['##', '[]', '..', '@.'], $row)); }
+	$wideMap = $map = [];
+	foreach ($input[0] as $row) {
+		$map[] = str_split($row);
+		$wideMap[] = str_split(str_replace(['#', 'O', '.', '@'], ['##', '[]', '..', '@.'], $row));
+	}
 
 	$intrs = $input[1];
 
