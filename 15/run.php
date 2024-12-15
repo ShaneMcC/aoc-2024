@@ -16,6 +16,29 @@
 	$directions['>'] = [1, 0];
 	$directions['v'] = [0, 1];
 
+	function canMoveItem($map, $cell, $direction) {
+		global $directions;
+
+		[$tX, $tY] = $cell;
+		[$dX, $dY] = $directions[$direction];
+
+		while (true) {
+			$tX += $dX;
+			$tY += $dY;
+			$nextCell = $map[$tY][$tX];
+
+			if ($nextCell === '#') {
+				return False;
+			} else if ($nextCell === '.') {
+				return True;
+			} else if ($nextCell === '[' && ($direction == '^' || $direction == 'v')) {
+				return canMoveItem($map, [$tX, $tY], $direction) && canMoveItem($map, [$tX + 1, $tY], $direction);
+			} else if ($nextCell === ']' && ($direction == '^' || $direction == 'v')) {
+				return canMoveItem($map, [$tX - 1, $tY], $direction) && canMoveItem($map, [$tX, $tY], $direction);
+			}
+		}
+	}
+
 	function moveItem(&$map, $cell, $direction) {
 		global $directions;
 
@@ -74,12 +97,10 @@
 					return False;
 				}
 
-				$testLeft = $testRight = $map;
+				$moveLeftResult = canMoveItem($map, $leftCell, $direction);
+				$moveRightResult = canMoveItem($map, $rightCell, $direction);
 
-				$moveLeftResult = moveWideItem($testLeft, $leftCell, $direction);
-				$moveRightResult = moveWideItem($testRight, $rightCell, $direction);
-
-				if ($moveLeftResult !== false && $moveRightResult !== false) {
+				if ($moveLeftResult && $moveRightResult) {
 					moveWideItem($map, $leftCell, $direction);
 					moveWideItem($map, $rightCell, $direction);
 
