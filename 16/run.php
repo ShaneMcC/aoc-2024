@@ -35,11 +35,11 @@
 			if ([$x, $y] == $end) {
 				if ($cost < $maxCost) {
 					$maxCost = min($cost, $maxCost);
-					$locations = [];
+					$locations = [$end];
 				}
 
 				if ($cost == $maxCost) {
-					$locations = array_unique(array_merge($locations, $steps));
+					$locations = array_unique(array_merge($locations, $steps), SORT_REGULAR);
 				}
 			}
 
@@ -47,14 +47,14 @@
 			[$tX, $tY] = [$x + $dX, $y + $dY];
 
 			if ($map[$tY][$tX] != '#') {
-				$queue->insert([$tX, $tY, $direction, array_merge($steps, ["{$x},{$y}"])], -($cost + 1));
+				$queue->insert([$tX, $tY, $direction, array_merge($steps, [[$x, $y]])], -($cost + 1));
 			}
 			foreach ($possibleDirections as $pd) {
 				$queue->insert([$x, $y, $pd, $steps], -($cost + 1000));
 			}
 		}
 
-		return [$maxCost, count($locations) + 1];
+		return [$maxCost, count($locations)];
 	}
 
 	[$part1, $part2] = getPathCost($map, $start, $end);
