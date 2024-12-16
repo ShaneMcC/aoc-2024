@@ -1,12 +1,27 @@
 #!/usr/bin/php
 <?php
+	$__CLI['long'] = ['interactive', 'draw'];
+	$__CLI['extrahelp'][] = '      --interactive        Run interactively and ignore instructions.';
+	$__CLI['extrahelp'][] = '      --draw               Draw final state.';
+
 	require_once(dirname(__FILE__) . '/../common/common.php');
 	$input = getInputLineGroups();
 
+	$interactiveMode = isset($__CLIOPTS['interactive']) && function_exists("pcntl_signal") && function_exists("pcntl_async_signals") && file_exists('/bin/stty');
+	if ($interactiveMode) { initFluff(); }
+
+	$drawMap = !$interactiveMode && isset($__CLIOPTS['draw']);
+
 	$wideMap = $map = [];
 	foreach ($input[0] as $row) {
-		$map[] = str_split($row);
-		$wideMap[] = str_split(str_replace(['#', 'O', '.', '@'], ['##', '[]', '..', '@.'], $row));
+		$map[] = str_split(str_replace([' '], ['.'], $row));
+		$wideMap[] = str_split(str_replace(['#', 'O', '.', ' ', '@'], ['##', '[]', '..', '..', '@.'], $row));
+	}
+
+	$isWideMap = !empty(findCells($map, '['));
+	if ($isWideMap) {
+		echo 'Map is already wide, skipping part 1.', "\n";
+		$wideMap = $map;
 	}
 
 	$intrs = $input[1];
@@ -116,28 +131,52 @@
 	}
 
 	function moveAround($map, $instructions) {
+		global $interactiveMode, $drawMap;
+
 		[$rX, $rY] = findCells($map, '@')[0];
 
-		foreach ($instructions as $instructionLine) {
-			foreach (str_split($instructionLine) as $ins) {
-				$moveResult = moveItem($map, [$rX, $rY], $ins);
-				if ($moveResult != false) {
-					[$rX, $rY] = $moveResult;
-				}
+		if ($interactiveMode|| isDebug()) {
+			fluffMap($map, "Begin State", false);
+		}
+
+		foreach ($instructions as $ins) {
+			$moveResult = moveItem($map, [$rX, $rY], $ins);
+			if ($moveResult != false) {
+				[$rX, $rY] = $moveResult;
 			}
+
+			if ($interactiveMode || isDebug()) {
+				fluffMap($map, "Moved: {$ins}", $interactiveMode);
+			}
+		}
+
+		if ($interactiveMode || $drawMap || isDebug()) {
+			fluffMap($map, "End State", $interactiveMode);
 		}
 
 		return $map;
 	}
 
-	$finalMap = moveAround($map, $intrs);
-	$part1 = 0;
-	foreach (findCells($finalMap, 'O') as [$x, $y]) {
-		$part1 += (100 * $y) + $x;
+	if (!$interactiveMode) {
+		function getInstructions($instructions) {
+			foreach ($instructions as $instructionLine) {
+				foreach (str_split($instructionLine) as $ins) {
+					yield $ins;
+				}
+			}
+		}
 	}
-	echo 'Part 1: ', $part1, "\n";
 
-	$finalWideMap = moveAround($wideMap, $intrs);
+	if (!$isWideMap) {
+		$finalMap = moveAround($map, getInstructions($intrs));
+		$part1 = 0;
+		foreach (findCells($finalMap, 'O') as [$x, $y]) {
+			$part1 += (100 * $y) + $x;
+		}
+		echo 'Part 1: ', $part1, "\n";
+	}
+
+	$finalWideMap = moveAround($wideMap, getInstructions($intrs));
 	$part2 = 0;
 	foreach (findCells($finalWideMap, '[') as [$x, $y]) {
 		$part2 += (100 * $y) + $x;
