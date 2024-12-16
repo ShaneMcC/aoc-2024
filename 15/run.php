@@ -1,8 +1,9 @@
 #!/usr/bin/php
 <?php
-	$__CLI['long'] = ['interactive', 'draw'];
+	$__CLI['long'] = ['interactive', 'draw', 'redraw'];
 	$__CLI['extrahelp'][] = '      --interactive        Run interactively and ignore instructions.';
 	$__CLI['extrahelp'][] = '      --draw               Draw final state.';
+	$__CLI['extrahelp'][] = '      --redraw             When debugging, redraw map over itself.';
 
 	require_once(dirname(__FILE__) . '/../common/common.php');
 	$input = getInputLineGroups();
@@ -11,6 +12,7 @@
 	if ($interactiveMode) { initFluff(); }
 
 	$drawMap = !$interactiveMode && isset($__CLIOPTS['draw']);
+	$redrawMap = ($interactiveMode || isset($__CLIOPTS['redraw'])) && !$drawMap;
 
 	$wideMap = $map = [];
 	foreach ($input[0] as $row) {
@@ -131,7 +133,7 @@
 	}
 
 	function moveAround($map, $instructions) {
-		global $interactiveMode, $drawMap;
+		global $interactiveMode, $drawMap, $redrawMap;
 
 		[$rX, $rY] = findCells($map, '@')[0];
 
@@ -146,12 +148,12 @@
 			}
 
 			if ($interactiveMode || isDebug()) {
-				fluffMap($map, "Moved: {$ins}", $interactiveMode);
+				fluffMap($map, "Moved: {$ins}", $redrawMap);
 			}
 		}
 
 		if ($interactiveMode || $drawMap || isDebug()) {
-			fluffMap($map, "End State", $interactiveMode);
+			fluffMap($map, "End State", $redrawMap);
 		}
 
 		return $map;
