@@ -46,11 +46,18 @@
 			[$dX, $dY, $possibleDirections] = $directions[$direction];
 			[$tX, $tY] = [$x + $dX, $y + $dY];
 
+			$steps = array_merge($steps, [[$x, $y]]);
+
 			if ($map[$tY][$tX] != '#') {
-				$queue->insert([$tX, $tY, $direction, array_merge($steps, [[$x, $y]])], -($cost + 1));
+				$queue->insert([$tX, $tY, $direction, $steps], -($cost + 1));
 			}
 			foreach ($possibleDirections as $pd) {
-				$queue->insert([$x, $y, $pd, $steps], -($cost + 1000));
+				[$pdX, $pdY] = $directions[$pd];
+				[$ptX, $ptY] = [$x + $pdX, $y + $pdY];
+
+				if ($map[$ptY][$ptX] != '#') {
+					$queue->insert([$ptX, $ptY, $pd, $steps], -($cost + 1001));
+				}
 			}
 		}
 
