@@ -8,17 +8,8 @@
 			$this->program = $program;
 		}
 
-		private function literal($value) {
-			return $value;
-		}
-
 		private function combo($value) {
-
-			if ($value == 0) { return $value; }
-			if ($value == 1) { return $value; }
-			if ($value == 2) { return $value; }
-			if ($value == 3) { return $value; }
-
+			if ($value >= 0 && $value <= 3) { return $value; }
 			if ($value == 4) { return $this->register['A']; }
 			if ($value == 5) { return $this->register['B']; }
 			if ($value == 6) { return $this->register['C']; }
@@ -44,7 +35,7 @@
 						break;
 
 					case 1: // bxl
-						$this->register['B'] = $this->register['B'] ^ $this->literal($arg);
+						$this->register['B'] = $this->register['B'] ^ $arg;
 						break;
 
 					case 2: // bst
@@ -53,7 +44,7 @@
 
 					case 3: // jnz
 						if ($this->register['A'] != 0) {
-							$ip = $this->literal($arg);
+							$ip = $arg;
 						}
 						break;
 
