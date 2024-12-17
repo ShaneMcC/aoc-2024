@@ -35,28 +35,32 @@
 			if ([$x, $y] == $end) {
 				if ($cost < $maxCost) {
 					$maxCost = min($cost, $maxCost);
-					$locations = [$end];
+					$locations["{$end[0]},{$end[1]}"] = True;
 				}
 
 				if ($cost == $maxCost) {
-					$locations = array_unique(array_merge($locations, $steps), SORT_REGULAR);
+					$locations = array_merge($locations, $steps);
 				}
 			}
 
 			[$dX, $dY, $possibleDirections] = $directions[$direction];
 			[$tX, $tY] = [$x + $dX, $y + $dY];
 
-			$steps = array_merge($steps, [[$x, $y]]);
+			$steps["{$x},{$y}"] = True;
 
 			if ($map[$tY][$tX] != '#') {
-				$queue->insert([$tX, $tY, $direction, $steps], -($cost + 1));
+				if (!array_key_exists("{$tX},{$tY}", $steps)) {
+					$queue->insert([$tX, $tY, $direction, $steps], -($cost + 1));
+				}
 			}
 			foreach ($possibleDirections as $pd) {
 				[$pdX, $pdY] = $directions[$pd];
 				[$ptX, $ptY] = [$x + $pdX, $y + $pdY];
 
 				if ($map[$ptY][$ptX] != '#') {
-					$queue->insert([$ptX, $ptY, $pd, $steps], -($cost + 1001));
+					if (!array_key_exists("{$ptX},{$ptY}", $steps)) {
+						$queue->insert([$ptX, $ptY, $pd, $steps], -($cost + 1001));
+					}
 				}
 			}
 		}
