@@ -5,7 +5,6 @@
 
 	$register = [];
 	$program = [];
-	$ip = 0;
 	foreach ($input as $line) {
 		if (preg_match('#^Register (.*): (.*)$#ADi', $line, $m)) {
 			$register[$m[1]] = $m[2];
@@ -14,79 +13,138 @@
 		}
 	}
 
-	function literal($value) {
-		return $value;
-	}
+	class Day17VM {
+		private $register = [];
+		private $program = [];
 
-	function combo($value) {
-		global $register;
+		function __construct($register, $program) {
+			$this->register = $register ?? ['A' => 0, 'B' => 0, 'C' => 0];
+			$this->program = $program;
+		}
 
-		if ($value == 0) { return $value; }
-		if ($value == 1) { return $value; }
-		if ($value == 2) { return $value; }
-		if ($value == 3) { return $value; }
-		if ($value == 4) { return $register['A']; }
-		if ($value == 5) { return $register['B']; }
-		if ($value == 6) { return $register['C']; }
-		if ($value == 7) { die('Invalid'); }
+		private function literal($value) {
+			return $value;
+		}
 
-		die('Invalid 2');
-	}
+		private function combo($value) {
 
-	$out = [];
+			if ($value == 0) { return $value; }
+			if ($value == 1) { return $value; }
+			if ($value == 2) { return $value; }
+			if ($value == 3) { return $value; }
 
-	while ($ip < count($program) - 1) {
-		$op = $program[$ip];
-		$arg = $program[$ip + 1];
-		$ip += 2;
+			if ($value == 4) { return $this->register['A']; }
+			if ($value == 5) { return $this->register['B']; }
+			if ($value == 6) { return $this->register['C']; }
+			die('Invalid');
+		}
 
-		switch ($op) {
+		public function run($A = False) {
+			if ($A !== False) {
+				$this->register = ['A' => $A, 'B' => 0, 'C' => 0];
+			}
 
-			case 0: // adv
-				$register['A'] = (int)($register['A'] / pow(2, combo($arg)));
-				break;
+			$ip = 0;
+			$out = [];
 
-			case 1: // bxl
-				$register['B'] = $register['B'] ^ literal($arg);
-				break;
+			while ($ip < count($this->program) - 1) {
+				$op = $this->program[$ip];
+				$arg = $this->program[$ip + 1];
+				$ip += 2;
 
-			case 2: // bst
-				$register['B'] = combo($arg) % 8;
-				break;
+				switch ($op) {
+					case 0: // adv
+						$this->register['A'] = (int)($this->register['A'] / pow(2, $this->combo($arg)));
+						break;
 
-			case 3: // jnz
-				if ($register['A'] != 0) {
-					$ip = literal($arg);
+					case 1: // bxl
+						$this->register['B'] = $this->register['B'] ^ $this->literal($arg);
+						break;
+
+					case 2: // bst
+						$this->register['B'] = $this->combo($arg) % 8;
+						break;
+
+					case 3: // jnz
+						if ($this->register['A'] != 0) {
+							$ip = $this->literal($arg);
+						}
+						break;
+
+					case 4: // bxc
+						$this->register['B'] = $this->register['B'] ^ $this->register['C'];
+						break;
+
+					case 5: // out
+						$out[] = $this->combo($arg) % 8;
+						break;
+
+					case 6: // bdv
+						$this->register['B'] = (int)($this->register['A'] / pow(2, $this->combo($arg)));
+						break;
+
+					case 7: // cdv
+						$this->register['C'] = (int)($this->register['A'] / pow(2, $this->combo($arg)));
+						break;
+
+					default:
+						die('Invalid?');
+						break;
 				}
-				break;
+			}
 
-			case 4: // bxc
-				$register['B'] = $register['B'] ^ $register['C'];
-				break;
+			return $out;
+		}
 
-			case 5: // out
-				$out[] = combo($arg) % 8;
-				break;
-
-			case 6: // bdv
-				$register['B'] = (int)($register['A'] / pow(2, combo($arg)));
-				break;
-
-			case 7: // cdv
-				$register['C'] = (int)($register['A'] / pow(2, combo($arg)));
-				break;
-
-			default:
-				die('Invalid?');
-				break;
+		public function debug($a) {
+			echo $a, ': ', implode(',', $this->run($a)), "\n";
 		}
 	}
 
-	var_dump($register);
-	echo implode(',', $out), "\n";
+	function findPart2($program) {
+		$vm = new Day17VM(NULL, $program);
 
-	$part1 = 0;
+		$max = count($program) - 1;
+		$maxbinlen = ($max + 1) * 3;
+		$maxdeclen = strlen(pow(8, $max + 1));
+
+		$check = array_fill(0, $max, []);
+		$check[$max][] = 0;
+
+		for ($i = $max; $i >= 0; $i--) {
+			$progSlice = array_slice($program, $i);
+			$next = $i - 1;
+
+			foreach ($check[$i] as $testA) {
+
+				if (isDebug()) { echo "[{$i}, {$testA}] => ", implode(',', $progSlice), "\n"; }
+
+				for ($a = $testA * 8; $a < ($testA * 8) + 8; $a++) {
+					$run = $vm->run($a);
+					$valid = ($run == $progSlice);
+
+					if (isDebug()) {
+						$bin = sprintf("%{$maxbinlen}s", decbin($a));
+						$dec = sprintf("%{$maxdeclen}s", $a);
+
+						echo "\t {{$dec} / {$bin}} => ", implode(',', $run);
+						echo ($valid ? " => Valid!" : ""), "\n";
+					}
+
+					if ($valid) {
+						$check[$next][] = $a;
+					}
+				}
+			}
+		}
+
+		return empty($check[-1] ?? []) ? -1 : min($check[-1]);
+	}
+
+	$vm = new Day17VM($register, $program);
+
+	$part1 = implode(',', $vm->run());
 	echo 'Part 1: ', $part1, "\n";
 
-	// $part2 = 0;
-	// echo 'Part 2: ', $part2, "\n";
+	$part2 = findPart2($program);
+	echo 'Part 2: ', $part2, "\n";
