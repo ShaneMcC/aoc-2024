@@ -3,13 +3,13 @@
 	require_once(dirname(__FILE__) . '/../common/common.php');
 	$input = getInputLines();
 
-	$register = [];
+	$register = ['A' => 0, 'B' => 0, 'C' => 0];
 	$program = [];
 	foreach ($input as $line) {
 		if (preg_match('#^Register (.*): (.*)$#ADi', $line, $m)) {
-			$register[$m[1]] = $m[2];
+			$register[$m[1]] = (int)($m[2]);
 		} else if (preg_match('#^Program: (.*)$#ADi', $line, $m)) {
-			$program = explode(',', $m[1]);
+			$program = array_map(fn($x) => (int)$x, explode(',', $m[1]));
 		}
 	}
 
