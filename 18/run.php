@@ -10,25 +10,6 @@
 		$entries[] = [$x, $y];
 	}
 
-	function getMapAtTime($time) {
-		global $entries;
-
-		$key = json_encode([__FILE__, __LINE__, func_get_args()]);
-
-		return storeCachedResult($key, function() use ($time, $entries) {
-			$size = (isTest() ? 6 : 70);
-			$map = array_fill(0, $size + 1, array_fill(0, $size + 1, '.'));
-
-			for ($i = 0; $i < min($time, count($entries) - 1); $i++) {
-				[$x, $y] = $entries[$i];
-
-				$map[$y][$x] = '#';
-			}
-
-			return $map;
-		});
-	}
-
 	function getPathCost($map, $start, $end) {
 		$queue = new SPLPriorityQueue();
 		$queue->setExtractFlags(SplPriorityQueue::EXTR_BOTH);
@@ -61,21 +42,23 @@
 		return False;
 	}
 
-
 	$size = (isTest() ? 6 : 70);
 	$start = [0, 0];
 	$end = [$size, $size];
-
-	$map = getMapAtTime(isTest() ? 12 : 1024);
-	$part1 = getPathCost($map, $start, $end);
-	echo 'Part 1: ', $part1, "\n";
-
-	$time = 0;
 	$map = array_fill(0, $size + 1, array_fill(0, $size + 1, '.'));
+
+	$startPoint = (isTest() ? 12 : 1024);
+
 	for ($i = 0; $i < count($entries); $i++) {
 		[$x, $y] = $entries[$i];
 		$map[$y][$x] = '#';
+		if ($i < $startPoint) { continue; }
+
 		$valid = getPathCost($map, $start, $end);
+
+		if ($i == $startPoint) {
+			echo 'Part 1: ', $valid, "\n";
+		}
 
 		if ($valid === FALSE) {
 			$part2 = [$x, $y];
