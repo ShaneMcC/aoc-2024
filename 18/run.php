@@ -17,6 +17,8 @@
 
 		$costs = [];
 
+		$adj = getAdjacentDirections();
+
 		while (!$queue->isEmpty()) {
 			$q = $queue->extract();
 			[$x, $y] = $q['data'];
@@ -28,8 +30,6 @@
 			if ([$x, $y] == $end) {
 				return $cost;
 			}
-
-			$adj = getAdjacentDirections();
 
 			foreach ($adj as [$dX, $dY]) {
 				[$tX, $tY] = [$x + $dX, $y + $dY];
