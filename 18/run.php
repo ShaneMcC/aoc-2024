@@ -29,36 +29,36 @@
 		});
 	}
 
-	function getPathCost($start, $end) {
+	function getPathCost($map, $start, $end) {
 		$queue = new SPLPriorityQueue();
 		$queue->setExtractFlags(SplPriorityQueue::EXTR_BOTH);
-		$queue->insert([$start[0], $start[1], 0, []], 0);
+		$queue->insert([$start[0], $start[1]], 0);
 
 		$costs = [];
 
-		$map = getMapAtTime(isTest() ? 12 : 1024);
-
 		while (!$queue->isEmpty()) {
 			$q = $queue->extract();
-			[$x, $y, $time, $steps] = $q['data'];
+			[$x, $y] = $q['data'];
 			$cost = abs($q['priority']);
 
 			if (isset($costs[$y][$x])) { continue; }
-			$costs[$y][$x] = [$cost, $time, $steps];
+			$costs[$y][$x] = $cost;
 
-			$steps["{$x},{$y}"] = True;
+			if ([$x, $y] == $end) {
+				return $cost;
+			}
 
 			$adj = getAdjacentDirections();
 
 			foreach ($adj as [$dX, $dY]) {
 				[$tX, $tY] = [$x + $dX, $y + $dY];
 				if (($map[$tY][$tX] ?? '#') != '#') {
-					$queue->insert([$tX, $tY, $time + 1, $steps], -($cost + 1));
+					$queue->insert([$tX, $tY], -($cost + 1));
 				}
 			}
 		}
 
-		return $costs[$end[1]][$end[0]] ?? False;
+		return False;
 	}
 
 
@@ -66,8 +66,21 @@
 	$start = [0, 0];
 	$end = [$size, $size];
 
-	$part1 = getPathCost($start, $end);
-	echo 'Part 1: ', count($part1[2] ?? []), "\n";
+	$map = getMapAtTime(isTest() ? 12 : 1024);
+	$part1 = getPathCost($map, $start, $end);
+	echo 'Part 1: ', $part1, "\n";
 
-	// $part2 = 0;
-	// echo 'Part 2: ', $part2, "\n";
+	$time = 0;
+	$map = array_fill(0, $size + 1, array_fill(0, $size + 1, '.'));
+	for ($i = 0; $i < count($entries); $i++) {
+		[$x, $y] = $entries[$i];
+		$map[$y][$x] = '#';
+		$valid = getPathCost($map, $start, $end);
+
+		if ($valid === FALSE) {
+			$part2 = [$x, $y];
+			break;
+		}
+	}
+
+	echo 'Part 2: ', implode(',', $part2), "\n";
