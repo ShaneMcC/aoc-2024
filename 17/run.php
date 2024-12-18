@@ -26,31 +26,51 @@
 		$check = array_fill(0, $max, []);
 		$check[$max][] = 0;
 
+		$tests = 0;
+		$useful = 0;
+
 		for ($i = $max; $i >= 0; $i--) {
 			$progSlice = array_slice($program, $i);
 			$next = $i - 1;
 
 			foreach ($check[$i] as $testA) {
-				if (isDebug()) { echo "[{$i}, {$testA}] => ", implode(',', $progSlice), "\n"; }
-				for ($a = $testA * 8; $a < ($testA * 8) + 8; $a++) {
+				$startA = $testA * 8;
+				$endA = $startA + 7;
+				if (isDebug()) { echo "[{$i}, {$testA}, {$startA}...{$endA}] => ", implode(',', $progSlice), "\n"; }
+				for ($a = $startA; $a <= $endA; $a++) {
+					$tests++;
 					$run = $vm->run($a);
 					$valid = ($run == $progSlice);
 
 					if (isDebug()) {
 						$maxbinlen = ($max + 1) * 3;
 						$maxdeclen = strlen($maxdec);
-						$bin = sprintf("%{$maxbinlen}s", decbin($a));
+						$maxoctlen = ($max + 1);
+						$decbin = decbin($a);
+						while (strlen($decbin) % 3 != 0) { $decbin = '0' . $decbin; }
+						$bin = sprintf("%{$maxbinlen}s", $decbin);
 						$dec = sprintf("%{$maxdeclen}s", $a);
+						$oct = sprintf("%-{$maxoctlen}s", base_convert($a, 10, 8));
 
-						echo "\t {{$dec} / {$bin}} => ", implode(',', $run);
+						echo "\t {{$dec} / {$bin} / {$oct}} => ", implode(',', $run);
 						echo ($valid ? " => Valid!" : ""), "\n";
 					}
 
 					if ($valid) {
+						$useful++;
 						$check[$next][] = $a;
 					}
 				}
 			}
+		}
+
+		if (isDebug()) {
+			$possible = count($check[-1] ?? []);
+			echo "\n";
+			echo "Tests: {$tests}\n";
+			echo "Useful: {$useful}\n";
+			echo "Possible: {$possible}\n";
+			echo "\n";
 		}
 
 		return empty($check[-1] ?? []) ? -1 : min($check[-1]);
