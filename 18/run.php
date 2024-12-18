@@ -13,7 +13,7 @@
 	function getPathCost($map, $start, $end) {
 		$queue = new SPLPriorityQueue();
 		$queue->setExtractFlags(SplPriorityQueue::EXTR_BOTH);
-		$queue->insert([$start[0], $start[1]], 0);
+		$queue->insert([$start[0], $start[1], []], 0);
 
 		$costs = [];
 
@@ -21,25 +21,27 @@
 
 		while (!$queue->isEmpty()) {
 			$q = $queue->extract();
-			[$x, $y] = $q['data'];
+			[$x, $y, $path] = $q['data'];
 			$cost = abs($q['priority']);
 
 			if (isset($costs[$y][$x])) { continue; }
+			$path["{$x},{$y}"] = True;
+
 			$costs[$y][$x] = $cost;
 
 			if ([$x, $y] == $end) {
-				return $cost;
+				return [$cost, $path];
 			}
 
 			foreach ($adj as [$dX, $dY]) {
 				[$tX, $tY] = [$x + $dX, $y + $dY];
 				if (($map[$tY][$tX] ?? '#') != '#') {
-					$queue->insert([$tX, $tY], -($cost + 1));
+					$queue->insert([$tX, $tY, $path], -($cost + 1));
 				}
 			}
 		}
 
-		return False;
+		return [False, False];
 	}
 
 	$size = (isTest() ? 6 : 70);
@@ -49,21 +51,23 @@
 
 	$startPoint = (isTest() ? 12 : 1024);
 
+	$previousPath = False;
+
 	for ($i = 0; $i < count($entries); $i++) {
 		[$x, $y] = $entries[$i];
 		$map[$y][$x] = '#';
 		if ($i < $startPoint) { continue; }
 
-		$valid = getPathCost($map, $start, $end);
+		if ($previousPath == False || isset($previousPath["{$x},{$y}"])) {
+			[$valid, $previousPath] = getPathCost($map, $start, $end);
+		}
 
 		if ($i == $startPoint) {
 			echo 'Part 1: ', $valid, "\n";
 		}
 
 		if ($valid === FALSE) {
-			$part2 = [$x, $y];
+			echo 'Part 2: ', implode(',', [$x, $y]), "\n";
 			break;
 		}
 	}
-
-	echo 'Part 2: ', implode(',', $part2), "\n";
