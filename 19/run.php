@@ -5,30 +5,21 @@
 	$towels = array_map(fn($x) => trim($x), explode(',', array_shift($patterns)));
 
 	function producePattern($pattern, $towels) {
-		$possible = [];
-		$possible[''] = ['', 1];
+		$key = json_encode([__FILE__, __LINE__, func_get_args()]);
 
-		$final = 0;
-
-		while (!empty($possible)) {
-			[$current, $count] = array_shift($possible);
+		return storeCachedResult($key, function() use ($pattern, $towels) {
+			$final = 0;
 
 			foreach ($towels as $t) {
-				$attempt = $current . $t;
-
-				if ($attempt == $pattern) { $final += $count; continue; }
-
-				if (str_starts_with($pattern, $attempt)) {
-					if (isset($possible[$attempt])) {
-						$possible[$attempt][1] += $count;
-					} else {
-						$possible[$attempt] = [$attempt, $count];
-					}
+				if ($t == $pattern) {
+					$final += 1;
+				} else if (str_starts_with($pattern, $t)) {
+					$final += producePattern(substr($pattern, strlen($t)), $towels);
 				}
 			}
-		}
 
-		return $final;
+			return $final;
+		});
 	}
 
 	$part1 = $part2 = 0;
