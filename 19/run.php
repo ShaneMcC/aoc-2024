@@ -6,38 +6,38 @@
 
 	function producePattern($pattern, $towels) {
 		$possible = [];
-		$possible[''] = [''];
+		$possible[''] = ['', 1];
+
+		$final = 0;
 
 		while (!empty($possible)) {
-			[$current] = array_shift($possible);
+			[$current, $count] = array_shift($possible);
 
 			foreach ($towels as $t) {
 				$attempt = $current . $t;
 
-				if ($attempt == $pattern) { return TRUE; }
+				if ($attempt == $pattern) { $final += $count; continue; }
 
 				if (str_starts_with($pattern, $attempt)) {
-					$possible[$attempt] = [$attempt];
+					if (isset($possible[$attempt])) {
+						$possible[$attempt][1] += $count;
+					} else {
+						$possible[$attempt] = [$attempt, $count];
+					}
 				}
 			}
 		}
 
-		return FALSE;
+		return $final;
 	}
 
-	$part1 = 0;
+	$part1 = $part2 = 0;
 	foreach ($patterns as $p) {
-		echo "Attempting Pattern: {$p}";
 		$isPossible = producePattern($p, $towels);
 
-		echo ($isPossible ? ' => Yes!' : ''), "\n";
-
-		if ($isPossible) {
-			$part1++;
-		}
+		$part1 += ($isPossible > 0);
+		$part2 += $isPossible;
 	}
 
 	echo 'Part 1: ', $part1, "\n";
-
-	// $part2 = 0;
-	// echo 'Part 2: ', $part2, "\n";
+	echo 'Part 2: ', $part2, "\n";
