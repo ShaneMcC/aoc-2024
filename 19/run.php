@@ -4,17 +4,17 @@
 	$patterns = getInputLines();
 	$towels = array_map(fn($x) => trim($x), explode(',', array_shift($patterns)));
 
-	function producePattern($pattern, $towels) {
-		$key = json_encode([__FILE__, __LINE__, func_get_args()]);
+	function producePattern($pattern) {
+		global $towels;
 
-		return storeCachedResult($key, function() use ($pattern, $towels) {
+		return storeCachedResult($pattern, function() use ($pattern, $towels) {
 			$final = 0;
 
 			foreach ($towels as $t) {
 				if ($t == $pattern) {
 					$final += 1;
 				} else if (str_starts_with($pattern, $t)) {
-					$final += producePattern(substr($pattern, strlen($t)), $towels);
+					$final += producePattern(substr($pattern, strlen($t)));
 				}
 			}
 
