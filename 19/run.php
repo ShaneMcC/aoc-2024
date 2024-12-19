@@ -4,22 +4,22 @@
 	$patterns = getInputLines();
 	$towels = array_map(fn($x) => trim($x), explode(',', array_shift($patterns)));
 
-	function producePattern($pattern) {
-		global $towels;
+	function producePattern($pattern, $towels) {
+		static $known = [];
 
-		return storeCachedResult($pattern, function() use ($pattern, $towels) {
-			$final = 0;
+		if (!isset($known[$pattern])) {
+			$known[$pattern] = 0;
 
 			foreach ($towels as $t) {
 				if ($t == $pattern) {
-					$final += 1;
+					$known[$pattern] += 1;
 				} else if (str_starts_with($pattern, $t)) {
-					$final += producePattern(substr($pattern, strlen($t)));
+					$known[$pattern] += producePattern(substr($pattern, strlen($t)), $towels);
 				}
 			}
+		}
 
-			return $final;
-		});
+		return $known[$pattern];
 	}
 
 	$part1 = $part2 = 0;
