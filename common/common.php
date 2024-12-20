@@ -202,6 +202,30 @@
 	}
 
 	/**
+	 * Return a list of all points within a given manhatten distance from a given point
+	 *
+	 * @param $x Point X location.
+	 * @param $y Point Y location.
+	 * @param $wanted Maximum allowed distance.
+	 * @return array Array of [$x, $y, $distance] points.
+	 */
+	function getManhattenPoints($x, $y, $wanted) {
+		$possible = [];
+
+		for ($tX = $x-$wanted; $tX <= $x + $wanted; $tX++) {
+			for ($tY = $y-$wanted; $tY <= $y + $wanted; $tY++) {
+				$man = manhattan($x, $y, $tX, $tY);
+				if ($man <= $wanted) {
+					$possible[] = [$tX, $tY, $man];
+				}
+			}
+		}
+
+		return $possible;
+	}
+
+
+	/**
 	 * Generator to provide X/Y coordinates.
 	 * X is returned as the Key, Y as the value
 	 *

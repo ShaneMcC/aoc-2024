@@ -39,21 +39,6 @@
 		return False;
 	}
 
-	function getManhattenPoints($x, $y, $wantedMan) {
-		$possible = [];
-
-		for ($tX = $x-$wantedMan; $tX <= $x + $wantedMan; $tX++) {
-			for ($tY = $y-$wantedMan; $tY <= $y + $wantedMan; $tY++) {
-				$man = manhattan($x, $y, $tX, $tY);
-				if ($man <= $wantedMan) {
-					$possible[] = [$tX, $tY, $man];
-				}
-			}
-		}
-
-		return $possible;
-	}
-
 	function findCheatOptions($costMap, $path, $cheatLen = 2, $wantedBenefit = 0) {
 		$options = [];
 
