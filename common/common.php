@@ -206,18 +206,23 @@
 	 *
 	 * @param $x Point X location.
 	 * @param $y Point Y location.
-	 * @param $wanted Maximum allowed distance.
+	 * @param $maximum Maximum allowed distance.
+	 * @param $minimum (Default: 0) Minimum allowed distance.
 	 * @return array Array of [$x, $y, $distance] points.
 	 */
-	function getManhattenPoints($x, $y, $wanted) {
+	function getManhattenPoints($x, $y, $maximum, $minimum = 0) {
 		$possible = [];
 
-		for ($tX = $x-$wanted; $tX <= $x + $wanted; $tX++) {
-			for ($tY = $y-$wanted; $tY <= $y + $wanted; $tY++) {
-				$man = manhattan($x, $y, $tX, $tY);
-				if ($man <= $wanted) {
-					$possible[] = [$tX, $tY, $man];
-				}
+		if ($minimum == 0) { $possible[] = [$x, $y, 0]; }
+
+		for ($man = $minimum; $man <= $maximum; $man++) {
+			for ($offset = 0; $offset < $man; $offset++) {
+				$invOffset = $man - $offset;
+
+				$possible[] = [$x + $offset, $y + $invOffset, $man];
+				$possible[] = [$x + $invOffset, $y - $offset, $man];
+				$possible[] = [$x - $offset, $y - $invOffset, $man];
+				$possible[] = [$x - $invOffset, $y + $offset, $man];
 			}
 		}
 
