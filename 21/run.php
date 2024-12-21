@@ -36,15 +36,15 @@
 		$vertical = str_repeat($vdir, abs($dY));
 		$horizontal = str_repeat($hdir, abs($dX));
 
+		$path = $horizontal . $vertical;
+
 		if ($hdir == '<' && $keypad[$sY][$eX] != '#') {
-			return $horizontal . $vertical;
+			$path = $horizontal . $vertical;
+		} else if ($hdir == '>' && $keypad[$eY][$sX] != '#' || $keypad[$eY][$sX] != '#') {
+			$path = $vertical . $horizontal;
 		}
 
-		if ($hdir == '>' && $keypad[$eY][$sX] != '#' || $keypad[$eY][$sX] != '#') {
-			return $vertical . $horizontal;
-		}
-
-		return $horizontal . $vertical;
+		return $path;
 	}
 
 	function getSequence($keypad, $sequence) {
@@ -52,24 +52,11 @@
 		$result = '';
 
 		foreach (str_split($sequence) as $c) {
-			$path = getPathFromAtoB($keypad, $current, $c);
-			$result .= $path . 'A';
+			$result .= getPathFromAtoB($keypad, $current, $c) . 'A';
 			$current = $c;
 		}
 
 		return $result;
-	}
-
-	function getNestedSequence($sequence, $chain = 2) {
-		global $arrowsPad, $mainKeypad;
-
-		$last = getSequence($mainKeypad, $sequence);
-
-		for ($i = 0; $i < $chain; $i++) {
-			$last = getSequence($arrowsPad, $last);
-		}
-
-		return $last;
 	}
 
 	function getSequenceCounts($keypad, $sequence) {
@@ -109,34 +96,22 @@
 		return $final;
 	}
 
-
-	$part1 = 0;
+	$part1 = $part2 = 0;
 	foreach ($input as $line) {
-		$seq = getNestedSequence($line);
+		$seqLen1 = getNestedSequenceCounts($line, 2);
+		$seqLen2 = getNestedSequenceCounts($line, 25);
 		$numVal = (int)str_replace('A', '', $line);
-		$seqLen = strlen($seq);
-		$calc = $numVal * $seqLen;
+		$calc1 = $numVal * $seqLen1;
+		$calc2 = $numVal * $seqLen2;
 
 		if (isDebug()) {
-			echo $line, ': ', $seq, " => {$seqLen} * {$numVal} = {$calc}", "\n";
+			echo $line, ': ', "=> {$seqLen1} * {$numVal} = {$calc1} // {$seqLen2} * {$numVal} = {$calc2}", "\n";
 		}
 
-		$part1 += $calc;
+		$part1 += $calc1;
+		$part2 += $calc2;
 	}
-	echo 'Part 1: ', $part1, "\n";
 
 	if (isDebug()) { echo "\n"; }
-
-	$part2 = 0;
-	foreach ($input as $line) {
-		$seqLen = getNestedSequenceCounts($line, 25);
-		$numVal = (int)str_replace('A', '', $line);
-		$calc = $numVal * $seqLen;
-
-		if (isDebug()) {
-			echo $line, ': ', "=> {$seqLen} * {$numVal} = {$calc}", "\n";
-		}
-
-		$part2 += $calc;
-	}
+	echo 'Part 1: ', $part1, "\n";
 	echo 'Part 2: ', $part2, "\n";
