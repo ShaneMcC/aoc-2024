@@ -16,22 +16,10 @@
 
 		[$sX, $sY] = findCells($keypad, $start)[0];
 		[$eX, $eY] = findCells($keypad, $end)[0];
-
 		[$dX, $dY] = [$eX - $sX, $eY - $sY];
 
-		$vdir = $hdir = '';
-
-		if ($sY > $eY) {
-			$vdir = '^';
-		} else if ($sY < $eY) {
-			$vdir = 'v';
-		}
-
-		if ($sX > $eX) {
-			$hdir = '<';
-		} else if ($sX < $eX) {
-			$hdir = '>';
-		}
+		$vdir = ($sY == $eY) ? '' : (($sY > $eY) ? '^' : 'v');
+		$hdir = ($sX == $eX) ? '' : (($sX > $eX) ? '<' : '>');
 
 		$vertical = str_repeat($vdir, abs($dY));
 		$horizontal = str_repeat($hdir, abs($dX));
