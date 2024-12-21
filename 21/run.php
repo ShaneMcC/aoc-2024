@@ -40,7 +40,7 @@
 			return $horizontal . $vertical;
 		}
 
-		if ($hdir == '>' || $keypad[$eY][$sX] != '#') {
+		if ($hdir == '>' && $keypad[$eY][$sX] != '#' || $keypad[$eY][$sX] != '#') {
 			return $vertical . $horizontal;
 		}
 
@@ -49,7 +49,6 @@
 
 	function getSequence($keypad, $sequence) {
 		$current = 'A';
-
 		$result = '';
 
 		foreach (str_split($sequence) as $c) {
@@ -73,6 +72,44 @@
 		return $last;
 	}
 
+	function getSequenceCounts($keypad, $sequence) {
+		$current = 'A';
+		$result = [];
+
+		foreach (str_split($sequence) as $c) {
+			$path = getPathFromAtoB($keypad, $current, $c) . 'A';
+			$result[$path] = ($result[$path] ?? 0) + 1;
+			$current = $c;
+		}
+
+		return $result;
+	}
+
+	function getNestedSequenceCounts($sequence, $chain = 2) {
+		global $arrowsPad, $mainKeypad;
+
+		$counts = [getSequence($mainKeypad, $sequence) => 1];
+
+		for ($i = 0; $i < $chain; $i++) {
+			$newCounts = [];
+			foreach ($counts as $seq => $count) {
+				foreach (getSequenceCounts($arrowsPad, $seq) as $nseq => $ncount) {
+					$newCounts[$nseq] = ($newCounts[$nseq] ?? 0) + ($ncount * $count);
+				}
+			}
+
+			$counts = $newCounts;
+		}
+
+		$final = 0;
+		foreach ($counts as $s => $c) {
+			$final += strlen($s) * $c;
+		}
+
+		return $final;
+	}
+
+
 	$part1 = 0;
 	foreach ($input as $line) {
 		$seq = getNestedSequence($line);
@@ -80,12 +117,26 @@
 		$seqLen = strlen($seq);
 		$calc = $numVal * $seqLen;
 
-		echo $line, ': ', $seq, " => {$seqLen} * {$numVal} = {$calc}", "\n";
+		if (isDebug()) {
+			echo $line, ': ', $seq, " => {$seqLen} * {$numVal} = {$calc}", "\n";
+		}
 
 		$part1 += $calc;
 	}
-
 	echo 'Part 1: ', $part1, "\n";
 
-	// $part2 = 0;
-	// echo 'Part 2: ', $part2, "\n";
+	if (isDebug()) { echo "\n"; }
+
+	$part2 = 0;
+	foreach ($input as $line) {
+		$seqLen = getNestedSequenceCounts($line, 25);
+		$numVal = (int)str_replace('A', '', $line);
+		$calc = $numVal * $seqLen;
+
+		if (isDebug()) {
+			echo $line, ': ', "=> {$seqLen} * {$numVal} = {$calc}", "\n";
+		}
+
+		$part2 += $calc;
+	}
+	echo 'Part 2: ', $part2, "\n";
