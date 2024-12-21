@@ -12,7 +12,7 @@
 	              ['<', 'v', '>']];
 
 	function getPathFromAtoB($keypad, $start, $end) {
-		if ($start == $end) { return ''; }
+		if ($start == $end) { return 'A'; }
 
 		[$sX, $sY] = findCells($keypad, $start)[0];
 		[$eX, $eY] = findCells($keypad, $end)[0];
@@ -44,7 +44,7 @@
 			$path = $vertical . $horizontal;
 		}
 
-		return $path;
+		return $path . 'A';
 	}
 
 	function getSequence($keypad, $sequence) {
@@ -52,7 +52,7 @@
 		$result = '';
 
 		foreach (str_split($sequence) as $c) {
-			$result .= getPathFromAtoB($keypad, $current, $c) . 'A';
+			$result .= getPathFromAtoB($keypad, $current, $c);
 			$current = $c;
 		}
 
@@ -64,7 +64,7 @@
 		$result = [];
 
 		foreach (str_split($sequence) as $c) {
-			$path = getPathFromAtoB($keypad, $current, $c) . 'A';
+			$path = getPathFromAtoB($keypad, $current, $c);
 			$result[$path] = ($result[$path] ?? 0) + 1;
 			$current = $c;
 		}
