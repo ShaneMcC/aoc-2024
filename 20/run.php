@@ -21,7 +21,7 @@
 			$cost = abs($q['priority']);
 
 			if (isset($costs[$y][$x])) { continue; }
-			$path["{$x},{$y}"] = True;
+			$path["{$x},{$y}"] = [$x, $y];
 			$costs[$y][$x] = $cost;
 
 			if ([$x, $y] == $end) {
@@ -42,9 +42,7 @@
 	function findCheatOptions($costMap, $path, $cheatLen = 2, $wantedBenefit = 0) {
 		$options = [];
 
-		foreach ($path as $point => $_) {
-			[$x, $y] = explode(',', $point);
-
+		foreach ($path as [$x, $y]) {
 			$myCost = $costMap[$y][$x];
 
 			foreach (getManhattenPoints($x, $y, $cheatLen) as [$tX, $tY, $man]) {
@@ -75,8 +73,7 @@
 	$costMap = $map;
 	[$baseCost, $basePath] = getPathAndCost($map, $start, $end);
 
-	foreach ($basePath as $point => $_) {
-		[$x, $y] = explode(',', $point);
+	foreach ($basePath as [$x, $y]) {
 		$costMap[$y][$x] = $baseCost--;
 	}
 
