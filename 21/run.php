@@ -48,13 +48,11 @@
 	}
 
 	function getSequenceCounts($keypad, $sequence) {
-		$current = 'A';
-		$result = [];
+		$bits = explode('A', getSequence($keypad, $sequence));
 
-		foreach (str_split($sequence) as $c) {
-			$path = getPathFromAtoB($keypad, $current, $c);
+		for ($i = 0; $i < count($bits) - 1; $i++) {
+			$path = $bits[$i] . 'A';
 			$result[$path] = ($result[$path] ?? 0) + 1;
-			$current = $c;
 		}
 
 		return $result;
