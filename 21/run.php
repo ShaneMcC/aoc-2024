@@ -24,8 +24,21 @@
 		$vertical = str_repeat($vdir, abs($dY));
 		$horizontal = str_repeat($hdir, abs($dX));
 
-		$path = $horizontal . $vertical;
+		// The rule here is essentially:
+		// Going left is expensive (higher up the chain), we want to do that as little as possible and as early as possible.
+		//
+		// So:
+		// - If we have to go left, and can do it without hitting '#', do it first. (As this requries 2 lefts from the starting 'A')
+		// - If not, do a middle button (which requires only 1-left from our starting 'A')
+		// - Otherwise, right button involves 0 lefts from our starting 'A'
+		//
+		// I think.
+		//
+		// More detailed explainers at: https://www.reddit.com/r/adventofcode/comments/1hj7f89/2024_day_21_part_1_found_a_rule_to_make_it_work/
+		//
+		// This however seems to work though and does the right thing.
 
+		$path = $horizontal . $vertical;
 		if ($hdir == '<' && $keypad[$sY][$eX] != '#') {
 			$path = $horizontal . $vertical;
 		} else if ($hdir == '>' && $keypad[$eY][$sX] != '#' || $keypad[$eY][$sX] != '#') {
