@@ -5,18 +5,17 @@
 
 	$part1 = 0;
 
-	function mix($input, $mixer) {
-		return $input ^ $mixer;
-	}
-
-	function prune($input) {
-		return $input % 16777216;
-	}
-
 	function getNextSecretNumber($secret) {
-		$secret = prune(mix($secret, ($secret * 64)));
-		$secret = mix($secret, (int)floor($secret / 32));
-		$secret = prune(mix($secret, ($secret * 2048)));
+		// Multiply by 64 and XOR with input
+		// mod 16777216
+		$secret = ($secret ^ ($secret << 6)) & 16777215;
+
+		// Divide by 32 and XOR with input
+		$secret = ($secret ^ ($secret >> 5));
+
+		// Multiply by 2048 and XOR with input
+		// mod 16777216
+		$secret = ($secret ^ ($secret << 11)) & 16777215;
 
 		return $secret;
 	}
@@ -31,5 +30,4 @@
 	}
 	echo 'Part 1: ', $part1, "\n";
 
-	// $part2 = 0;
-	// echo 'Part 2: ', $part2, "\n";
+	//
