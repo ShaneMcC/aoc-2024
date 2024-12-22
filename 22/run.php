@@ -11,7 +11,8 @@
 	// `10010 10000 10000 01110` for 9 8 7 6
 	// `10000 10000 01110 01110` for 8 7 6 5
 	// etc.
-	$maxChangeKey = 1024 * 1024;
+	// We only want to store the bottom 20 bits.
+	$maxChangeKey = (1 << 20);
 
 	$part1 = 0;
 
