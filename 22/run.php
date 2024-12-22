@@ -28,23 +28,24 @@
 		$secret = $m;
 		$bananas = abs($secret % 10);
 
+		$setsOfFour = [];
 		$changes = [];
 		for ($i = 0; $i < $maxCount; $i++) {
 			$secret = getNextSecretNumber($secret);
 			$newBananas = abs($secret % 10);
 			$diff = $newBananas - $bananas;
 			$bananas = $newBananas;
-			$changes[] = [$diff, $bananas];
-		}
 
-		$setsOfFour = [];
-		for ($i = 0; $i < count($changes) - 3; $i++) {
-			$test = [$changes[$i][0], $changes[$i + 1][0], $changes[$i + 2][0], $changes[$i + 3][0]];
-			$implode = implode(',', $test);
+			$changes[] = $diff;
 
-			if (!isset($setsOfFour[$implode])) {
-				$setsOfFour[$implode] = $changes[$i + 3][1];
-				$allSetsOfFour[$implode] = ($allSetsOfFour[$implode] ?? 0) + $setsOfFour[$implode];
+			$test = array_slice($changes, -4);
+			if (count($test) == 4) {
+				$implode = implode(',', $test);
+
+				if (!isset($setsOfFour[$implode])) {
+					$setsOfFour[$implode] = $bananas;
+					$allSetsOfFour[$implode] = ($allSetsOfFour[$implode] ?? 0) + $bananas;
+				}
 			}
 		}
 
