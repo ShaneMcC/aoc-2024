@@ -32,20 +32,21 @@
 		$changes = [];
 		for ($i = 0; $i < $maxCount; $i++) {
 			$secret = getNextSecretNumber($secret);
+
 			$newBananas = abs($secret % 10);
 			$diff = $newBananas - $bananas;
 			$bananas = $newBananas;
 
 			$changes[] = $diff;
-
-			$test = array_slice($changes, -4);
-			if (count($test) == 4) {
-				$implode = implode(',', $test);
+			if (count($changes) == 4) {
+				$implode = implode(',', $changes);
 
 				if (!isset($setsOfFour[$implode])) {
 					$setsOfFour[$implode] = $bananas;
 					$allSetsOfFour[$implode] = ($allSetsOfFour[$implode] ?? 0) + $bananas;
 				}
+
+				array_shift($changes);
 			}
 		}
 
