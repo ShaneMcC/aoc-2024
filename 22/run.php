@@ -22,12 +22,9 @@
 
 	$maxCount = 2000;
 
-	$monkeys = [];
-	foreach ($input as $m) { $monkeys[$m] = []; }
-
 	$allSetsOfFour = [];
 	$part1 = 0;
-	foreach ($monkeys as $m => $_) {
+	foreach ($input as $m) {
 		$secret = $m;
 		$bananas = abs($secret % 10);
 
@@ -50,12 +47,6 @@
 				$allSetsOfFour[$implode] = ($allSetsOfFour[$implode] ?? 0) + $setsOfFour[$implode];
 			}
 		}
-
-		$monkey = [];
-		// $monkey['changes'] = $changes;
-		$monkey['final'] = $secret;
-		$monkey['setsOfFour'] = $setsOfFour;
-		$monkeys[$m] = $monkey;
 
 		$part1 += $secret;
 	}
