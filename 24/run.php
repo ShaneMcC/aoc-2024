@@ -15,49 +15,62 @@
 
 	$gates = [];
 	foreach ($gateInput as $line) {
-		echo $line, "\n";
 		preg_match('#(.*) (.*) (.*) -> (.*)#ADi', $line, $m);
 		[$all, $a, $op, $b, $out] = $m;
-		$gates[] = ['action' => [$a, $op, $b, $out], 'processed' => false];
+		$gates[$out] = ['a' => $a, 'op' => $op, 'b' => $b];
 	}
 
-	$hasProcessed = true;
-	while ($hasProcessed) {
-		$hasProcessed = false;
-		foreach ($gates as $gateid => $gate) {
-			if (!$gate['processed']) {
-				[$a, $op, $b, $out] = $gate['action'];
+	$__WIRECACHE = [];
 
-				if (isset($wires[$a]) && isset($wires[$b])) {
-					[$a, $b] = [(int)$wires[$a], (int)$wires[$b]];
+	function getWireValue($gateid) {
+		global $gates, $wires, $__WIRECACHE;
 
-					if ($op == 'AND') {
-						$wires[$out] = $a & $b;
-					} else if ($op == 'OR') {
-						$wires[$out] = $a | $b;
-					} else if ($op == 'XOR') {
-						$wires[$out] = $a ^ $b;
-					} else {
-						die('Unknown: ' . $op);
-					}
+		if (!isset($__WIRECACHE[$gateid])) {
+			if (isset($wires[$gateid])) {
+				$result = $wires[$gateid];
+			} else if (isset($gates[$gateid])) {
+				$gate = $gates[$gateid];
 
-					$gates[$gateid]['processed'] = true;
-					$hasProcessed = true;
+				$a = $wires[$gate['a']] ?? getWireValue($gate['a']);
+				$op = $gate['op'];
+				$b = $wires[$gate['b']]  ?? getWireValue($gate['b']);
+
+				if ($op == 'AND') {
+					$result = $a & $b;
+				} else if ($op == 'OR') {
+					$result = $a | $b;
+				} else if ($op == 'XOR') {
+					$result = $a ^ $b;
 				}
+			} else {
+				die('Invalid gate or wire: ' . $gateid . "\n");
+			}
+
+			$__WIRECACHE[$gateid] = $result;
+		}
+
+		return $__WIRECACHE[$gateid];
+
+	}
+
+	function getNumbers() {
+		global $gates, $wires;
+
+		$keys = array_unique(array_merge(array_keys($gates), array_keys($wires)));
+
+		sort($keys);
+		$result = ['x' => '', 'y' => '', 'z' => ''];
+
+		foreach ($keys as $wire) {
+			if (isset($result[$wire[0]])) {
+				$result[$wire[0]] .= getWireValue($wire);
 			}
 		}
+		foreach (array_keys($result) as $k) { $result[$k] = strrev($result[$k]); }
+
+		return $result;
 	}
 
-	ksort($wires);
-
-	$part1 = '';
-	foreach ($wires as $wire => $value) {
-		if ($wire[0] == 'z') {
-			$part1 = $value . $part1;
-		}
-	}
-
+	$numbers = getNumbers();
+	$part1 = $numbers['z'];
 	echo 'Part 1: ', bindec($part1), "\n";
-
-	// $part2 = 0;
-	// echo 'Part 2: ', $part2, "\n";
